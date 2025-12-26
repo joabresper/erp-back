@@ -12,3 +12,42 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String
+  phone     String?   
+  address   String?
+
+  role      Role     @relation(fields: [roleId], references: [id])
+  roleId    String
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  description String?
+
+  users User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  description String?
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId        String
+  permissionId  String
+
+  role      Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
