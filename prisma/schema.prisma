@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -20,8 +20,9 @@ model User {
   fullName  String
   phone     String?   
   address   String?
+  deletedAt DateTime?
 
-  role      Role     @relation(fields: [roleId], references: [id])
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   roleId    String
 }
 
@@ -31,7 +32,7 @@ model Role {
   description String?
 
   users User[]
-  permissions RolePermission[]
+  permissions Permission[]
 }
 
 model Permission {
@@ -39,15 +40,5 @@ model Permission {
   name      String   @unique
   description String?
 
-  roles RolePermission[]
-}
-
-model RolePermission {
-  roleId        String
-  permissionId  String
-
-  role      Role       @relation(fields: [roleId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
-
-  @@id([roleId, permissionId])
+  roles Role[]
 }
