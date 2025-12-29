@@ -8,14 +8,21 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangeUserRoleDto } from './dto/change-user-rol.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { HashingService } from 'src/common/providers/hashing.service';
 
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: DeepMockProxy<PrismaClient>;
   let rolesService: RolesService;
+  let hashingService: HashingService;
 
   const mockRolesService = {
     findByName: jest.fn(),
+  };
+
+  const mockHashingService = {
+    hash: jest.fn(),
+    compare: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -30,12 +37,17 @@ describe('UsersService', () => {
           provide: RolesService,
           useValue: mockRolesService,
         },
+        {
+          provide: HashingService,
+          useValue: mockHashingService,
+        },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     prisma = module.get(PrismaService);
     rolesService = module.get<RolesService>(RolesService);
+    hashingService = module.get<HashingService>(HashingService);
   });
 
   afterEach(() => {
@@ -62,11 +74,12 @@ describe('UsersService', () => {
         description: 'Admin role',
       };
 
+      const hashedPassword = '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
       const mockUser = {
         id: 'uuid-user-123',
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
+        password: hashedPassword,
         phone: null,
         address: null,
         roleId: 'uuid-role-123',
@@ -74,6 +87,7 @@ describe('UsersService', () => {
         role: mockRole,
       };
 
+      mockHashingService.hash.mockResolvedValue(hashedPassword);
       prisma.user.create.mockResolvedValue(mockUser);
 
       // 2. ACTUAR (Act)
@@ -84,7 +98,7 @@ describe('UsersService', () => {
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
           fullName: createUserDto.fullName,
-          password: createUserDto.password,
+          password: hashedPassword,
           email: createUserDto.email,
           role: {
             connect: { id: createUserDto.roleId },
@@ -109,11 +123,12 @@ describe('UsersService', () => {
         description: 'Default user role',
       };
 
+      const hashedPassword = '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
       const mockUser = {
         id: 'uuid-user-123',
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
+        password: hashedPassword,
         phone: null,
         address: null,
         roleId: 'uuid-default-role',
@@ -122,6 +137,7 @@ describe('UsersService', () => {
       };
 
       mockRolesService.findByName.mockResolvedValue(mockDefaultRole);
+      mockHashingService.hash.mockResolvedValue(hashedPassword);
       prisma.user.create.mockResolvedValue(mockUser);
 
       // 2. ACTUAR
@@ -133,7 +149,7 @@ describe('UsersService', () => {
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
           fullName: createUserDto.fullName,
-          password: createUserDto.password,
+          password: hashedPassword,
           email: createUserDto.email,
           role: {
             connect: { id: mockDefaultRole.id },
@@ -164,7 +180,7 @@ describe('UsersService', () => {
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
-    it('debería guardar la contraseña sin encriptar (prueba básica)', async () => {
+    it('debería encriptar la contraseña antes de guardarla', async () => {
       // 1. PREPARAR
       const createUserDto: CreateUserDto = {
         email: 'test@example.com',
@@ -173,11 +189,12 @@ describe('UsersService', () => {
         roleId: 'uuid-role-123',
       };
 
+      const hashedPassword = '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
       const mockUser = {
         id: 'uuid-user-123',
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: 'plainPassword123', // La contraseña se guarda tal cual (sin hashear)
+        password: hashedPassword, // La contraseña se guarda encriptada
         phone: null,
         address: null,
         roleId: 'uuid-role-123',
@@ -189,17 +206,21 @@ describe('UsersService', () => {
         },
       };
 
+      mockHashingService.hash.mockResolvedValue(hashedPassword);
       prisma.user.create.mockResolvedValue(mockUser);
 
       // 2. ACTUAR
       const result = await service.create(createUserDto);
 
       // 3. VERIFICAR
-      expect(result.password).toBe('plainPassword123');
+      expect(result.password).toBe(hashedPassword);
+      expect(result.password).not.toBe(createUserDto.password); // La contraseña no debe ser la original
+      expect(mockHashingService.hash).toHaveBeenCalledWith(createUserDto.password);
+      expect(mockHashingService.hash).toHaveBeenCalledTimes(1);
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
           fullName: createUserDto.fullName,
-          password: 'plainPassword123',
+          password: hashedPassword,
           email: createUserDto.email,
           role: {
             connect: { id: createUserDto.roleId },
@@ -220,11 +241,12 @@ describe('UsersService', () => {
         address: '123 Main St',
       };
 
+      const hashedPassword = '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
       const mockUser = {
         id: 'uuid-user-123',
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
+        password: hashedPassword,
         phone: createUserDto.phone ?? null,
         address: createUserDto.address ?? null,
         roleId: 'uuid-role-123',
@@ -236,6 +258,7 @@ describe('UsersService', () => {
         },
       };
 
+      mockHashingService.hash.mockResolvedValue(hashedPassword);
       prisma.user.create.mockResolvedValue(mockUser);
 
       // 2. ACTUAR
@@ -256,17 +279,40 @@ describe('UsersService', () => {
         roleId: 'uuid-role-123',
       };
 
+      const hashedPassword = '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
         code: 'P2002',
         clientVersion: '5.0',
       } as any);
 
+      mockHashingService.hash.mockResolvedValue(hashedPassword);
       prisma.user.create.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
       await expect(service.create(createUserDto))
         .rejects
         .toThrow(Prisma.PrismaClientKnownRequestError);
+    });
+
+    it('debería propagar el error si el hashing de la contraseña falla', async () => {
+      // 1. PREPARAR
+      const createUserDto: CreateUserDto = {
+        email: 'test@example.com',
+        fullName: 'John Doe',
+        password: 'password123',
+        roleId: 'uuid-role-123',
+      };
+
+      const hashingError = new Error('Hashing failed');
+      mockHashingService.hash.mockRejectedValue(hashingError);
+
+      // 2. ACTUAR Y VERIFICAR
+      await expect(service.create(createUserDto))
+        .rejects
+        .toThrow('Hashing failed');
+      expect(mockHashingService.hash).toHaveBeenCalledWith(createUserDto.password);
+      expect(mockHashingService.hash).toHaveBeenCalledTimes(1);
+      expect(prisma.user.create).not.toHaveBeenCalled();
     });
   });
 

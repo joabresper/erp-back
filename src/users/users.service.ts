@@ -5,16 +5,20 @@ import { RolesService } from 'src/roles/roles.service';
 import { User } from '@prisma/client';
 import { ChangeUserRoleDto } from './dto/change-user-rol.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { HashingService } from 'src/common/providers/hashing.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prismaService: PrismaService,
-    private rolesService: RolesService
+    private rolesService: RolesService,
+    private hashingService: HashingService
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const { password, ...userData } = createUserDto;
     let roleId = createUserDto.roleId;
+
 
     if (!roleId) {
       const defaultRole = await this.rolesService.findByName('USER');
@@ -26,13 +30,13 @@ export class UsersService {
     }
 
     // TODO: agregar hasheo de la password
-    const password = createUserDto.password;
+    const hashedPassword = await this.hashingService.hash(password);
 
     return await this.prismaService.user.create({
       data: {
-        fullName: createUserDto.fullName,
-        password,
-        email: createUserDto.email,
+        fullName: userData.fullName,
+        password: hashedPassword,
+        email: userData.email,
         role: {
           connect: { id: roleId }
         }
