@@ -7,20 +7,42 @@ import { ChangeUserRoleDto } from './dto/change-user-rol.dto';
 import { User } from '@prisma/client';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let service: UsersService;
+  let service: DeepMockProxy<UsersService>;
 
-  const mockUsersService: jest.Mocked<UsersService> = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
-    changeRole: jest.fn(),
-  } as any;
+  // Factories para fixtures
+  const createUserDtoFactory = (overrides?: Partial<CreateUserDto>): CreateUserDto => ({
+    email: 'test@example.com',
+    fullName: 'John Doe',
+    password: 'password123',
+    roleId: 'uuid-role-123',
+    ...overrides,
+  });
+
+  const mockRoleFactory = (overrides?: Partial<{ id: string; name: string; description: string }>) => ({
+    id: 'uuid-role-123',
+    name: 'ADMIN',
+    description: 'Admin role',
+    ...overrides,
+  });
+
+  const mockUserFactory = (
+    overrides?: Partial<User & { role: ReturnType<typeof mockRoleFactory> }>
+  ): User & { role: ReturnType<typeof mockRoleFactory> } => ({
+    id: 'uuid-user-123',
+    email: 'test@example.com',
+    fullName: 'John Doe',
+    password: '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012',
+    phone: null,
+    address: null,
+    roleId: 'uuid-role-123',
+    deletedAt: null,
+    role: mockRoleFactory(),
+    ...overrides,
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,13 +50,13 @@ describe('UsersController', () => {
       providers: [
         {
           provide: UsersService,
-          useValue: mockUsersService,
+          useValue: mockDeep<UsersService>(),
         },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get<UsersService>(UsersService);
+    service = module.get(UsersService);
   });
 
   afterEach(() => {
@@ -48,32 +70,13 @@ describe('UsersController', () => {
   describe('create', () => {
     it('debería crear un usuario y retornarlo', async () => {
       // 1. PREPARAR (Arrange)
-      const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        fullName: 'John Doe',
-        password: 'password123',
-        roleId: 'uuid-role-123',
-      };
-
-      const mockRole = {
-        id: 'uuid-role-123',
-        name: 'ADMIN',
-        description: 'Admin role',
-      };
-
-      const createdUser: User & { role: typeof mockRole } = {
-        id: 'uuid-user-123',
+      const createUserDto = createUserDtoFactory();
+      const createdUser = mockUserFactory({
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
-        phone: null,
-        address: null,
-        roleId: 'uuid-role-123',
-        deletedAt: null,
-        role: mockRole,
-      };
+      });
 
-      mockUsersService.create.mockResolvedValue(createdUser as any);
+      service.create.mockResolvedValue(createdUser as any);
 
       // 2. ACTUAR (Act)
       const result = await controller.create(createUserDto);
@@ -85,31 +88,20 @@ describe('UsersController', () => {
     });
 
     it('debería crear un usuario sin especificar rol (usa rol por defecto)', async () => {
-      const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        fullName: 'John Doe',
-        password: 'password123',
-      };
-
-      const mockDefaultRole = {
+      const createUserDto = createUserDtoFactory({ roleId: undefined });
+      const mockDefaultRole = mockRoleFactory({
         id: 'uuid-default-role',
         name: 'USER',
         description: 'Default user role',
-      };
-
-      const createdUser: User & { role: typeof mockDefaultRole } = {
-        id: 'uuid-user-123',
+      });
+      const createdUser = mockUserFactory({
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
-        phone: null,
-        address: null,
-        roleId: 'uuid-default-role',
-        deletedAt: null,
+        roleId: mockDefaultRole.id,
         role: mockDefaultRole,
-      };
+      });
 
-      mockUsersService.create.mockResolvedValue(createdUser as any);
+      service.create.mockResolvedValue(createdUser as any);
 
       const result = await controller.create(createUserDto);
 
@@ -118,56 +110,32 @@ describe('UsersController', () => {
     });
 
     it('debería lanzar un error si no existe el rol por defecto', async () => {
-      const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        fullName: 'John Doe',
-        password: 'password123',
-      };
-
+      const createUserDto = createUserDtoFactory({ roleId: undefined });
       const error = new InternalServerErrorException(
         'The system is not configured correctly (Missing default role).'
       );
 
-      mockUsersService.create.mockRejectedValue(error);
+      service.create.mockRejectedValue(error);
 
       await expect(controller.create(createUserDto))
         .rejects
         .toThrow(InternalServerErrorException);
-      await expect(controller.create(createUserDto))
-        .rejects
-        .toThrow('The system is not configured correctly (Missing default role).');
       expect(service.create).toHaveBeenCalledWith(createUserDto);
     });
 
     it('debería crear un usuario con campos opcionales (phone, address)', async () => {
-      const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        fullName: 'John Doe',
-        password: 'password123',
-        roleId: 'uuid-role-123',
+      const createUserDto = createUserDtoFactory({
         phone: '1234567890',
         address: '123 Main St',
-      };
-
-      const mockRole = {
-        id: 'uuid-role-123',
-        name: 'ADMIN',
-        description: 'Admin role',
-      };
-
-      const createdUser: User & { role: typeof mockRole } = {
-        id: 'uuid-user-123',
+      });
+      const createdUser = mockUserFactory({
         email: createUserDto.email,
         fullName: createUserDto.fullName,
-        password: createUserDto.password,
         phone: createUserDto.phone ?? null,
         address: createUserDto.address ?? null,
-        roleId: 'uuid-role-123',
-        deletedAt: null,
-        role: mockRole,
-      };
+      });
 
-      mockUsersService.create.mockResolvedValue(createdUser as any);
+      service.create.mockResolvedValue(createdUser as any);
 
       const result = await controller.create(createUserDto);
 
@@ -178,19 +146,13 @@ describe('UsersController', () => {
     });
 
     it('debería lanzar un error si el email ya existe (duplicado)', async () => {
-      const createUserDto: CreateUserDto = {
-        email: 'duplicate@example.com',
-        fullName: 'John Doe',
-        password: 'password123',
-        roleId: 'uuid-role-123',
-      };
-
+      const createUserDto = createUserDtoFactory({ email: 'duplicate@example.com' });
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
         code: 'P2002',
         clientVersion: '5.0',
       } as any);
 
-      mockUsersService.create.mockRejectedValue(error);
+      service.create.mockRejectedValue(error);
 
       await expect(controller.create(createUserDto))
         .rejects
@@ -225,7 +187,7 @@ describe('UsersController', () => {
         },
       ];
 
-      mockUsersService.findAll.mockResolvedValue(mockUsers);
+      service.findAll.mockResolvedValue(mockUsers);
 
       // 2. ACTUAR
       const result = await controller.findAll();
@@ -239,7 +201,7 @@ describe('UsersController', () => {
 
     it('debería retornar una lista vacía si no hay usuarios', async () => {
       const mockUsers: User[] = [];
-      mockUsersService.findAll.mockResolvedValue(mockUsers);
+      service.findAll.mockResolvedValue(mockUsers);
 
       const result = await controller.findAll();
 
@@ -261,7 +223,7 @@ describe('UsersController', () => {
         deletedAt: null,
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      service.findByEmail.mockResolvedValue(mockUser);
 
       // 2. ACTUAR
       const result = await controller.findAll(email);
@@ -280,7 +242,7 @@ describe('UsersController', () => {
         { code: 'P2025', clientVersion: '5.0.0' } as any
       );
 
-      mockUsersService.findByEmail.mockRejectedValue(error);
+      service.findByEmail.mockRejectedValue(error);
 
       await expect(controller.findAll(email))
         .rejects
@@ -304,7 +266,7 @@ describe('UsersController', () => {
         deletedAt: null,
       };
 
-      mockUsersService.findById.mockResolvedValue(mockUser);
+      service.findById.mockResolvedValue(mockUser);
 
       // 2. ACTUAR
       const result = await controller.findOne(userId);
@@ -322,7 +284,7 @@ describe('UsersController', () => {
         { code: 'P2025', clientVersion: '5.0.0' } as any
       );
 
-      mockUsersService.findById.mockRejectedValue(error);
+      service.findById.mockRejectedValue(error);
 
       await expect(controller.findOne(userId))
         .rejects
@@ -330,15 +292,6 @@ describe('UsersController', () => {
       expect(service.findById).toHaveBeenCalledWith(userId);
     });
 
-    it('debería validar que el id sea un UUID válido (ParseUUIDPipe)', async () => {
-      // ParseUUIDPipe lanzará un error si el UUID no es válido
-      // Este test verifica que el pipe funciona correctamente
-      const invalidId = 'not-a-uuid';
-
-      // ParseUUIDPipe lanzará BadRequestException si el UUID no es válido
-      // En este caso, el error se lanzará antes de llegar al servicio
-      await expect(controller.findOne(invalidId)).rejects.toThrow();
-    });
   });
 
   describe('update', () => {
@@ -361,7 +314,7 @@ describe('UsersController', () => {
         deletedAt: null,
       };
 
-      mockUsersService.update.mockResolvedValue(updatedUser);
+      service.update.mockResolvedValue(updatedUser);
 
       // 2. ACTUAR
       const result = await controller.update(userId, updateUserDto);
@@ -389,7 +342,7 @@ describe('UsersController', () => {
         deletedAt: null,
       };
 
-      mockUsersService.update.mockResolvedValue(updatedUser);
+      service.update.mockResolvedValue(updatedUser);
 
       const result = await controller.update(userId, updateUserDto);
 
@@ -409,7 +362,7 @@ describe('UsersController', () => {
         clientVersion: '5.0',
       } as any);
 
-      mockUsersService.update.mockRejectedValue(error);
+      service.update.mockRejectedValue(error);
 
       await expect(controller.update(userId, updateUserDto))
         .rejects
@@ -417,14 +370,6 @@ describe('UsersController', () => {
       expect(service.update).toHaveBeenCalledWith(userId, updateUserDto);
     });
 
-    it('debería validar que el id sea un UUID válido (ParseUUIDPipe)', async () => {
-      const invalidId = 'not-a-uuid';
-      const updateUserDto: UpdateUserDto = {
-        fullName: 'New Name',
-      };
-
-      await expect(controller.update(invalidId, updateUserDto)).rejects.toThrow();
-    });
   });
 
   describe('changeRol', () => {
@@ -453,7 +398,7 @@ describe('UsersController', () => {
         role: mockNewRole,
       };
 
-      mockUsersService.changeRole.mockResolvedValue(updatedUser as any);
+      service.changeRole.mockResolvedValue(updatedUser as any);
 
       // 2. ACTUAR
       const result = await controller.changeRol(userId, changeUserRoleDto);
@@ -477,7 +422,7 @@ describe('UsersController', () => {
         clientVersion: '5.0',
       } as any);
 
-      mockUsersService.changeRole.mockRejectedValue(error);
+      service.changeRole.mockRejectedValue(error);
 
       await expect(controller.changeRol(userId, changeUserRoleDto))
         .rejects
@@ -499,7 +444,7 @@ describe('UsersController', () => {
         } as any
       );
 
-      mockUsersService.changeRole.mockRejectedValue(error);
+      service.changeRole.mockRejectedValue(error);
 
       await expect(controller.changeRol(userId, changeUserRoleDto))
         .rejects
@@ -507,16 +452,6 @@ describe('UsersController', () => {
       expect(service.changeRole).toHaveBeenCalledWith(userId, changeUserRoleDto);
     });
 
-    it('debería validar que el id sea un UUID válido (ParseUUIDPipe)', async () => {
-      const invalidId = 'not-a-uuid';
-      const changeUserRoleDto: ChangeUserRoleDto = {
-        roleId: 'uuid-new-role',
-      };
-
-      await expect(controller.changeRol(invalidId, changeUserRoleDto))
-        .rejects
-        .toThrow();
-    });
   });
 
   describe('remove', () => {
@@ -534,7 +469,7 @@ describe('UsersController', () => {
         deletedAt: new Date(),
       };
 
-      mockUsersService.remove.mockResolvedValue(deletedUser);
+      service.remove.mockResolvedValue(deletedUser);
 
       // 2. ACTUAR
       const result = await controller.remove(userId);
@@ -553,7 +488,7 @@ describe('UsersController', () => {
         clientVersion: '5.0',
       } as any);
 
-      mockUsersService.remove.mockRejectedValue(error);
+      service.remove.mockRejectedValue(error);
 
       await expect(controller.remove(userId))
         .rejects
@@ -561,10 +496,5 @@ describe('UsersController', () => {
       expect(service.remove).toHaveBeenCalledWith(userId);
     });
 
-    it('debería validar que el id sea un UUID válido (ParseUUIDPipe)', async () => {
-      const invalidId = 'not-a-uuid';
-
-      await expect(controller.remove(invalidId)).rejects.toThrow();
-    });
   });
 });

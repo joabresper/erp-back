@@ -1,23 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RolesService } from './roles.service';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { DeepMockProxy, mockDeep } from 'jest-mock-extended'
+import { Prisma } from '@prisma/client';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { PermissionsService } from './permissions.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 describe('RolesService', () => {
   let service: RolesService;
-  let prisma: DeepMockProxy<PrismaClient>
-  let permissionsService: PermissionsService;
-
-  const mockPermissionsService = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findById: jest.fn(),
-    findByName: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
-  };
+  let prisma: DeepMockProxy<PrismaService>;
+  let permissionsService: DeepMockProxy<PermissionsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,18 +16,18 @@ describe('RolesService', () => {
         RolesService,
         {
           provide: PrismaService,
-          useValue: mockDeep<PrismaClient>(),
+          useValue: mockDeep<PrismaService>(),
         },
         {
           provide: PermissionsService,
-          useValue: mockPermissionsService,
-        }
-      ]
+          useValue: mockDeep<PermissionsService>(),
+        },
+      ],
     }).compile();
 
     service = module.get<RolesService>(RolesService);
     prisma = module.get(PrismaService);
-    permissionsService = module.get<PermissionsService>(PermissionsService);
+    permissionsService = module.get(PermissionsService);
   });
 
   it('should be defined', () => {
