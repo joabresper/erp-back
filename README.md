@@ -1,98 +1,213 @@
+# ERP Backend API
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  Sistema ERP backend desarrollado con <a href="http://nodejs.org" target="_blank">Node.js</a> y <a href="https://nestjs.com" target="_blank">NestJS</a>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 📋 Descripción
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ERP Backend es una API RESTful desarrollada con NestJS que proporciona una base sólida para la gestión empresarial. El sistema incluye módulos de gestión de usuarios, roles y permisos, con una arquitectura escalable y mantenible.
 
-## Project setup
+## ✨ Características
+
+- 🔐 **Gestión de Usuarios**: Sistema completo de usuarios con autenticación y autorización
+- 👥 **Sistema de Roles y Permisos**: Control de acceso basado en roles (RBAC) con permisos granulares
+- 🗄️ **Base de Datos PostgreSQL**: Persistencia de datos robusta con Prisma ORM
+- 📚 **Documentación API**: Swagger/OpenAPI integrado para documentación interactiva
+- ✅ **Validación de Datos**: Validación automática de entrada con class-validator
+- 🔒 **Seguridad**: Hash de contraseñas con bcrypt
+- 🧪 **Testing**: Suite de tests unitarios y e2e con Jest
+- 🎯 **TypeScript**: Código type-safe y mantenible
+- 🚀 **Arquitectura Modular**: Estructura organizada y escalable
+
+## 🛠️ Stack Tecnológico
+
+- **Framework**: NestJS 11.x
+- **Lenguaje**: TypeScript 5.x
+- **Base de Datos**: PostgreSQL
+- **ORM**: Prisma 7.x
+- **Validación**: class-validator, class-transformer
+- **Documentación**: Swagger/OpenAPI
+- **Testing**: Jest
+- **Linting**: ESLint + Prettier
+
+## 📦 Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado:
+
+- [Node.js](https://nodejs.org/) (v18 o superior)
+- [npm](https://www.npmjs.com/) o [yarn](https://yarnpkg.com/)
+- [PostgreSQL](https://www.postgresql.org/) (v12 o superior)
+- [Docker](https://www.docker.com/) (opcional, para desarrollo con docker-compose)
+
+## 🚀 Instalación
+
+1. **Clonar el repositorio**
 
 ```bash
-$ npm install
+git clone <repository-url>
+cd erp-back
 ```
 
-## Compile and run the project
+2. **Instalar dependencias**
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+3. **Configurar variables de entorno**
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/erp_db?schema=public"
+PORT=3000
+```
+
+4. **Configurar la base de datos**
 
 ```bash
-# unit tests
-$ npm run test
+# Generar el cliente de Prisma
+npx prisma generate
 
-# e2e tests
-$ npm run test:e2e
+# Ejecutar migraciones
+npx prisma migrate dev
 
-# test coverage
-$ npm run test:cov
+# (Opcional) Abrir Prisma Studio para visualizar la base de datos
+npx prisma studio
 ```
 
-## Deployment
+## 🏃 Ejecución
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Modo Desarrollo
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```bash
+npm run start:dev
+```
+
+La aplicación estará disponible en `http://localhost:3000`
+
+### Modo Producción
+
+```bash
+# Compilar
+npm run build
+
+# Ejecutar
+npm run start:prod
+```
+
+### Modo Debug
+
+```bash
+npm run start:debug
+```
+
+## 📚 Documentación de API
+
+Una vez que la aplicación esté en ejecución, puedes acceder a la documentación interactiva de Swagger en:
+
+```
+http://localhost:3000/api
+```
+
+La documentación incluye:
+- Descripción de todos los endpoints
+- Esquemas de datos
+- Ejemplos de peticiones y respuestas
+- Capacidad de probar endpoints directamente desde el navegador
+
+## 🧪 Testing
+
+### Ejecutar tests unitarios
+
+```bash
+npm run test
+```
+
+### Ejecutar tests en modo watch
+
+```bash
+npm run test:watch
+```
+
+### Ejecutar tests e2e
+
+```bash
+npm run test:e2e
+```
+
+### Generar reporte de cobertura
 
 ```bash
 $ npm install -g @nestjs/mau
 $ mau deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🔧 Scripts Disponibles
 
-## Resources
+| Script | Descripción |
+|--------|-------------|
+| `npm run build` | Compila el proyecto TypeScript |
+| `npm run start` | Ejecuta la aplicación en modo producción |
+| `npm run start:dev` | Ejecuta en modo desarrollo con hot-reload |
+| `npm run start:debug` | Ejecuta en modo debug |
+| `npm run start:prod` | Ejecuta la versión compilada |
+| `npm run test` | Ejecuta tests unitarios |
+| `npm run test:watch` | Ejecuta tests en modo watch |
+| `npm run test:cov` | Genera reporte de cobertura |
+| `npm run test:e2e` | Ejecuta tests end-to-end |
+| `npm run lint` | Ejecuta el linter |
+| `npm run format` | Formatea el código con Prettier |
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🗄️ Base de Datos
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+El proyecto utiliza Prisma como ORM. Los modelos principales incluyen:
 
-## Support
+- **User**: Gestión de usuarios del sistema
+- **Role**: Roles de usuario
+- **Permission**: Permisos del sistema
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Comandos útiles de Prisma
 
-## Stay in touch
+```bash
+# Crear una nueva migración
+npx prisma migrate dev --name nombre_migracion
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Aplicar migraciones en producción
+npx prisma migrate deploy
 
-## License
+# Generar el cliente de Prisma
+npx prisma generate
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Abrir Prisma Studio (GUI para la base de datos)
+npx prisma studio
+
+# Resetear la base de datos (¡cuidado en producción!)
+npx prisma migrate reset
+```
+
+## 🔐 Seguridad
+
+- Las contraseñas se almacenan con hash usando bcrypt
+- Validación de entrada en todos los endpoints
+- Manejo de errores personalizado
+- Soft delete para usuarios (campo `deletedAt`)
+
+## 📝 Licencia
+
+Este proyecto es privado y no está licenciado para uso público.
+
+## 👥 Contribución
+
+Este es un proyecto privado. Para contribuciones internas, por favor sigue las guías de desarrollo del equipo.
+
+---
+
+<p align="center">
+  Desarrollado con ❤️ usando <a href="https://nestjs.com">NestJS</a>
+</p>
