@@ -426,16 +426,9 @@ describe('UsersService', () => {
     it('debería retornar un usuario si existe con el email proporcionado', async () => {
       // 1. PREPARAR
       const userEmail = 'test@example.com';
-      const mockUser = {
-        id: 'uuid-user-123',
+      const mockUser = mockUserFactory({
         email: userEmail,
-        fullName: 'John Doe',
-        password: 'password123',
-        phone: null,
-        address: null,
-        roleId: 'uuid-role-123',
-        deletedAt: null,
-      };
+      });
 
       prisma.user.findFirstOrThrow.mockResolvedValue(mockUser);
 
@@ -445,11 +438,13 @@ describe('UsersService', () => {
       // 3. VERIFICAR
       expect(result).toEqual(mockUser);
       expect(result.email).toBe(userEmail);
+      expect(result.role).toBeDefined();
       expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           email: userEmail,
           deletedAt: null,
         },
+        include: { role: true },
       });
     });
 
@@ -473,6 +468,7 @@ describe('UsersService', () => {
           email: userEmail,
           deletedAt: null,
         },
+        include: { role: true },
       });
     });
 
@@ -496,22 +492,16 @@ describe('UsersService', () => {
           email: userEmail,
           deletedAt: null,
         },
+        include: { role: true },
       });
     });
 
     it('debería buscar por email exacto (case sensitive)', async () => {
       // 1. PREPARAR
       const userEmail = 'Test@Example.com';
-      const mockUser = {
-        id: 'uuid-user-123',
+      const mockUser = mockUserFactory({
         email: userEmail,
-        fullName: 'John Doe',
-        password: 'password123',
-        phone: null,
-        address: null,
-        roleId: 'uuid-role-123',
-        deletedAt: null,
-      };
+      });
 
       prisma.user.findFirstOrThrow.mockResolvedValue(mockUser);
 
@@ -520,12 +510,16 @@ describe('UsersService', () => {
 
       // 3. VERIFICAR
       expect(result).toEqual(mockUser);
-      expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
-        where: {
-          email: userEmail,
-          deletedAt: null,
-        },
-      });
+      expect(result.role).toBeDefined();
+      expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            email: userEmail,
+            deletedAt: null,
+          },
+          include: { role: true },
+        })
+      );
     });
   });
 
