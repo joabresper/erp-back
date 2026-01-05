@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "@prisma/client";
 
 export class User {
 	@ApiProperty({
@@ -51,4 +52,8 @@ export class User {
 		nullable: true,
 	})
 	deletedAt: Date | null;
+}
+
+export class UserWithRole extends User {
+	role: Role
 }

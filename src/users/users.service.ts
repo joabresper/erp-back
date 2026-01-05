@@ -6,6 +6,7 @@ import { User } from '@prisma/client';
 import { ChangeUserRoleDto } from './dto/change-user-rol.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HashingService } from 'src/common/providers/hashing.service';
+import { UserWithRole } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -60,12 +61,13 @@ export class UsersService {
     });
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<UserWithRole> {
     return await this.prismaService.user.findFirstOrThrow({
       where: {
         email,
         deletedAt: null
       },
+      include: { role: true }
     })
   }
 
