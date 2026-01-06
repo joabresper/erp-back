@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
+import { DtoValidationPipe } from './common/pipes/dto-validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('ERP API')
@@ -16,16 +17,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,            // ignora parametros no esperados
-      forbidNonWhitelisted: true, // lanza una excepcion cuando recibe parametros no esperados
-      transform: true,            // transforma tipos de datos
-      transformOptions: {
-        enableImplicitConversion: true, // convierte strings a números/booleanos automáticamente
-      },
-    }),
-  );
+  app.useGlobalPipes(new DtoValidationPipe());
 
   app.useGlobalFilters(new PrismaClientExceptionFilter());
 
