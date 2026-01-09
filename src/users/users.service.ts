@@ -18,19 +18,23 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, ...userData } = createUserDto;
-    let roleId = createUserDto.roleId;
+    let role = createUserDto.role;
 
 
-    if (!roleId) {
+    if (!role) {
       const defaultRole = await this.rolesService.findByName('USER');
       
       if (!defaultRole) {
         throw new InternalServerErrorException('The system is not configured correctly (Missing default role).');
       }
-      roleId = defaultRole.id;
+      role = defaultRole.name;
     }
 
-    // TODO: agregar hasheo de la password
+    const roleRecord = await this.rolesService.findByName(role);
+    if (!roleRecord) {
+      throw new InternalServerErrorException(`The role ${role} does not exist.`);
+    }
+
     const hashedPassword = await this.hashingService.hash(password);
 
     return await this.prismaService.user.create({
@@ -39,7 +43,7 @@ export class UsersService {
         password: hashedPassword,
         email: userData.email,
         role: {
-          connect: { id: roleId }
+          connect: { id: roleRecord.id }
         }
       },
       include: { role: true }

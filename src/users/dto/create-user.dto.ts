@@ -46,10 +46,9 @@ export class CreateUserDto {
 	address?: string;
 
 	@ApiProperty({
-		description: 'The roleId of the user',
+		description: 'The role name of the user',
 	})	
 	@IsString()
-	@IsUUID()
 	@IsOptional()
-	roleId?: string;
+	role?: string;
 }
