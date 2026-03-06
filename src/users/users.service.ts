@@ -65,6 +65,15 @@ export class UsersService {
     });
   }
 
+  async findByIdWithRole(id: string): Promise<UserWithRole> {
+    return await this.prismaService.user.findFirstOrThrow({
+      where: {
+        id,
+      },
+      include: { role: true }
+    });
+  }
+
   async findByEmail(email: string): Promise<UserWithRole> {
     return await this.prismaService.user.findFirstOrThrow({
       where: {

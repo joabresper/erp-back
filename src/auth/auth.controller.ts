@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -16,5 +16,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.signIn(loginAuthDto);
+  }
+
+  @Get('profile')
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getProfile(@Req() req) {
+    const userId = req.user.sub; // El ID del usuario está en el campo "sub" del JWT
+    return this.authService.getProfile(userId);
   }
 }

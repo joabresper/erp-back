@@ -3,7 +3,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { UsersService } from 'src/users/users.service';
 import { HashingService } from 'src/common/providers/hashing.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserWithRole } from 'src/users/entities/user.entity';
+import { UserWithoutPasswordWithRole, UserWithRole } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -38,5 +38,9 @@ export class AuthService {
 		return {
 			accessToken: await this.jwtService.signAsync(payload),
 		}
+	}
+
+	async getProfile(userId: string): Promise<UserWithoutPasswordWithRole> {
+		return await this.usersService.findByIdWithRole(userId);
 	}
 }
