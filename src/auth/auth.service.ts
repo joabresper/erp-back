@@ -33,7 +33,11 @@ export class AuthService {
 		if (!isPasswordValid) {
 			throw new UnauthorizedException('Invalid credentials');
 		}
-		const payload = { sub: user.id, role: user.role.name }
+		const payload = {
+			sub: user.id,
+			role: user.role.name,
+			level: user.role.level,
+		}
 		
 		return {
 			accessToken: await this.jwtService.signAsync(payload),

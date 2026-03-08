@@ -22,6 +22,7 @@ async function main() {
     create: {
       name: 'ADMIN',
       description: 'Administrador del sistema',
+      level: 100,
     },
   });
   console.log(`✅ Rol creado/asegurado: ${adminRole.name}`);

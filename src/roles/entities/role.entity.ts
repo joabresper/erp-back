@@ -19,4 +19,10 @@ export class RoleEntity implements Role {
 		example: 'Admin role',
 	})
 	description: string | null;
+
+	@ApiProperty({
+		description: 'The level of the role (higher means more permissions)',
+		example: 1,
+	})
+	level: number;
 }

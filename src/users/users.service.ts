@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesService } from 'src/roles/roles.service';
@@ -16,23 +16,26 @@ export class UsersService {
     private hashingService: HashingService
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(creatorLevel: number, createUserDto: CreateUserDto): Promise<User> {
     const { password, ...userData } = createUserDto;
-    let role = createUserDto.role;
+    let roleId = createUserDto.roleId;
 
-
-    if (!role) {
+    if (!roleId) {
       const defaultRole = await this.rolesService.findByName('USER');
       
       if (!defaultRole) {
         throw new InternalServerErrorException('The system is not configured correctly (Missing default role).');
       }
-      role = defaultRole.name;
+      roleId = defaultRole.id;
+    }
+    const role = await this.rolesService.findById(roleId);
+    if (!role) {
+      throw new InternalServerErrorException(`The role with ID ${roleId} does not exist.`);
     }
 
-    const roleRecord = await this.rolesService.findByName(role);
-    if (!roleRecord) {
-      throw new InternalServerErrorException(`The role ${role} does not exist.`);
+    // Verificamos que el usuario que crea el nuevo usuario tenga permisos para asignar el rol solicitado
+    if (creatorLevel <= role.level) {
+      throw new UnauthorizedException('You do not have permission to create a user with this role.');
     }
 
     const hashedPassword = await this.hashingService.hash(password);
@@ -43,16 +46,17 @@ export class UsersService {
         password: hashedPassword,
         email: userData.email,
         role: {
-          connect: { id: roleRecord.id }
+          connect: { id: roleId }
         }
       },
       include: { role: true }
     });
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(includeRole: boolean): Promise<User[] | UserWithRole[]> {
     return await this.prismaService.user.findMany({
-      where: { deletedAt: null }
+      where: { deletedAt: null },
+      include: { role: includeRole }
     });
   }
 

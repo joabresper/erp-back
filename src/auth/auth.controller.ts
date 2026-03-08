@@ -22,8 +22,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@Req() req) {
-    const userId = req.user.sub; // El ID del usuario está en el campo "sub" del JWT
-    return this.authService.getProfile(userId);
+  async getProfile(@Req() req: any) {
+    return this.authService.getProfile(req.user.id);
   }
 }
