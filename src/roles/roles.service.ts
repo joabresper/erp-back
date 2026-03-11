@@ -25,8 +25,12 @@ export class RolesService {
     });
   }
 
-  async findAll(): Promise<Role[]> {
-    return await this.prismaService.role.findMany();
+  async findAll(includePermissions: boolean = false): Promise<Role[]> {
+    return await this.prismaService.role.findMany({
+      include: {
+        permissions: includePermissions,
+      },
+    });
   }
 
   async findByName(name: string): Promise<Role> {
@@ -55,37 +59,12 @@ export class RolesService {
   }
 
   // Permissions methods
-  async addPermission(roleId: string, permissionId: string) {
-    return await this.prismaService.role.update({
-      where: { id: roleId },
-      data: {
-        permissions: {
-          connect: { id: permissionId }
-        }
-      },
-      include: { permissions: true },
-    })
-  }
-
-  async removePermission(roleId: string, permissionId: string) {
-    return await this.prismaService.role.update({
-      where: { id: roleId },
-      data: {
-        permissions: {
-          disconnect: { id: permissionId }
-        }
-      },
-      include: { permissions: true },
-    })
-  }
-
   async updatePermissions(roleId: string, permissionIds: string[]) {
     return this.prismaService.role.update({
       where: { id: roleId },
       data: {
         permissions: {
-          set: [],
-          connect: permissionIds.map((id) => ({ id })),
+          set: permissionIds.map((id) => ({ id })),
         },
       },
       include: { permissions: true },

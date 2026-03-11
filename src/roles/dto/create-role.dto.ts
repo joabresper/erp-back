@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class CreateRoleDto {
 	@ApiProperty({
@@ -25,5 +25,7 @@ export class CreateRoleDto {
 	})
 	@IsNumber()
 	@IsOptional()
+	@Min(1)
+	@Max(100)
 	level: number;
 }
