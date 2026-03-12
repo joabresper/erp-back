@@ -19,8 +19,9 @@ export class RolesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rolesService.findById(id);
+  findOne(@Param('id') id: string, @Query('includePermissions') includePermissions?: string) {
+    const includePerms = includePermissions === 'true';
+    return this.rolesService.findById(id, includePerms);
   }
 
   @Patch(':id')

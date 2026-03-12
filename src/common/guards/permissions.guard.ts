@@ -1,13 +1,13 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/require-permissions.decorator';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private prisma: PrismaService,
+    private rolesService: RolesService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -20,7 +20,7 @@ export class PermissionsGuard implements CanActivate {
     if (!requiredPermissions) {
       return true;
     }
-
+    
     // 2. Obtenemos el usuario (Ya validado por JwtAuthGuard)
     const { user } = context.switchToHttp().getRequest();
     
@@ -34,14 +34,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     // 3. Si NO es Admin vamos a la BD a ver qué permisos tiene su rol
-    const roleWithPermissions = await this.prisma.role.findUnique({
-      where: { name: user.role },
-      include: { 
-        permissions: {
-          select: { name: true } 
-        } 
-      },
-    });
+    const roleWithPermissions = await this.rolesService.findByName(user.role, true);
 
     if (!roleWithPermissions) {
       throw new ForbiddenException('Role not found');
@@ -50,7 +43,7 @@ export class PermissionsGuard implements CanActivate {
     // 4. Verificamos coincidencia
     const userPermissions = roleWithPermissions.permissions.map((p) => p.name);
     
-    const hasPermission = requiredPermissions.some((permission) =>
+    const hasPermission = requiredPermissions.every((permission) =>
       userPermissions.includes(permission),
     );
 
