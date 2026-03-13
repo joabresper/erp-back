@@ -4,23 +4,23 @@ import { PrismaService } from '../src/prisma/prisma.service';
 const prisma = new PrismaService();
 
 const PERMISSIONS_LIST = [
-  { name: 'CREATE_USER', description: 'Permite crear nuevos usuarios' },
-  { name: 'UPDATE_USER', description: 'Permite modificar usuarios existentes' },
-  { name: 'DELETE_USER', description: 'Permite eliminar usuarios' },
-  { name: 'VIEW_USERS', description: 'Permite ver la lista de usuarios' },
+  { name: 'USER:CREATE', description: 'Permite crear nuevos usuarios' },
+  { name: 'USER:UPDATE', description: 'Permite modificar usuarios existentes' },
+  { name: 'USER:DELETE', description: 'Permite eliminar usuarios' },
+  { name: 'USER:VIEW', description: 'Permite ver la lista de usuarios' },
 
-  { name: 'CREATE_ROLE', description: 'Permite crear roles' },
-  { name: 'UPDATE_ROLE', description: 'Permite modificar roles existentes' },
-  { name: 'DELETE_ROLE', description: 'Permite eliminar roles' },
-  { name: 'VIEW_ROLES', description: 'Permite ver la lista de roles' },
+  { name: 'ROLE:CREATE', description: 'Permite crear roles' },
+  { name: 'ROLE:UPDATE', description: 'Permite modificar roles existentes' },
+  { name: 'ROLE:DELETE', description: 'Permite eliminar roles' },
+  { name: 'ROLE:VIEW', description: 'Permite ver la lista de roles' },
 
-  { name: 'VIEW_PERMISSIONS', description: 'Permite ver la lista de permisos' },
+  { name: 'PERMISSION:VIEW', description: 'Permite ver la lista de permisos' },
 
-  { name: 'UPDATE_ROLE_PERMISSIONS', description: 'Permite modificar los permisos de los roles' },
-  { name: 'UPDATE_USER_ROLE', description: 'Permite modificar el rol de los usuarios' },
+  { name: 'ROLE:UPDATE_PERMISSIONS', description: 'Permite modificar los permisos de los roles' },
+  { name: 'USER:UPDATE_ROLE', description: 'Permite modificar el rol de los usuarios' },
 
-  { name: 'VIEW_PROFILE', description: 'Permite ver el perfil propio' },
-  { name: 'UPDATE_PROFILE', description: 'Permite actualizar el perfil propio' },
+  { name: 'PROFILE:VIEW', description: 'Permite ver el perfil propio' },
+  { name: 'PROFILE:UPDATE', description: 'Permite actualizar el perfil propio' },
 ];
 
 async function main() {
