@@ -36,10 +36,10 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @Patch(':id')
-  @RequirePermissions('CHANGE_USER_ROLE')
-  changeRol(@Param('id', ParseUUIDPipe) id: string, @Body() changeUserRolDto: ChangeUserRoleDto) {
-    return this.usersService.changeRole(id, changeUserRolDto);
+  @Patch(':id/role')
+  @RequirePermissions('USER:UPDATE_ROLE')
+  changeRole(@Param('id', ParseUUIDPipe) id: string, @Req() req: any, @Body() changeUserRoleDto: ChangeUserRoleDto) {
+    return this.usersService.changeRole(id, req.user.level, changeUserRoleDto);
   }
 
   @Delete(':id')

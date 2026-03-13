@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesService } from 'src/roles/roles.service';
@@ -127,12 +127,21 @@ export class UsersService {
     });
   }
 
-  async changeRole(id: string, changeUserRolDto: ChangeUserRoleDto) {
+  async changeRole(id: string, creatorLevel: number, changeUserRoleDto: ChangeUserRoleDto) {
+    const role = await this.rolesService.findById(changeUserRoleDto.roleId);
+    if (!role) {
+      throw new NotFoundException(`The role with ID ${changeUserRoleDto.roleId} does not exist.`);
+    }
+
+    if (creatorLevel <= role.level) {
+      throw new ForbiddenException('You do not have permission to assign this role to the user.');
+    }
+
     return await this.prismaService.user.update({
       where: { id },
       data: {
         role: {
-          connect: { id: changeUserRolDto.roleId }
+          connect: { id: changeUserRoleDto.roleId }
         }
       },
       include: { role: true }
