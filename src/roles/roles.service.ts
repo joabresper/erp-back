@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from '@prisma/client';
@@ -11,16 +11,7 @@ export class RolesService {
     private prismaService: PrismaService
   ) {}
 
-  async create(creatorLevel: number, createRoleDto: CreateRoleDto): Promise<Role> {
-
-    if (!createRoleDto.level) {
-      createRoleDto.level = 1;
-    }
-
-    if (creatorLevel <= createRoleDto.level) {
-      throw new UnauthorizedException('You do not have permission to create a role with this level.');
-    }
-
+  async create(createRoleDto: CreateRoleDto): Promise<Role> {
     return await this.prismaService.role.create({
       data: createRoleDto,
     });

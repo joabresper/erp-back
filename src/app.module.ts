@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
+import { HierarchyGuard } from './common/guards/hierarchy.guard';
 
 @Module({
   imports: [
@@ -30,6 +31,10 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
       provide: 'APP_GUARD',
       useClass: PermissionsGuard,
     },
+    {
+      provide: 'APP_GUARD',
+      useClass: HierarchyGuard,
+    }
   ],
 })
 export class AppModule {}
