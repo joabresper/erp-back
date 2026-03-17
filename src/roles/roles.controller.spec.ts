@@ -2,20 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { UpdateRoleDto, UpdateRolePermissionsDto } from './dto/update-role.dto';
 import { Role } from '@prisma/client';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 
 describe('RolesController', () => {
   let controller: RolesController;
-  let service: RolesService;
-
-  const mockRolesService: jest.Mocked<RolesService> = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findById: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
-  } as any;
+  let service: DeepMockProxy<RolesService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,7 +16,7 @@ describe('RolesController', () => {
       providers: [
         {
           provide: RolesService,
-          useValue: mockRolesService,
+          useValue: mockDeep<RolesService>(),
         },
       ],
     }).compile();
@@ -53,7 +46,7 @@ describe('RolesController', () => {
         description: createRoleDto.description ?? null,
       };
 
-      mockRolesService.create.mockResolvedValue(createdRole);
+      service.create.mockResolvedValue(createdRole);
 
       // 2. ACTUAR (Act)
       const result = await controller.create(createRoleDto);
@@ -74,7 +67,7 @@ describe('RolesController', () => {
         description: null,
       };
 
-      mockRolesService.create.mockResolvedValue(createdRole);
+      service.create.mockResolvedValue(createdRole);
 
       const result = await controller.create(createRoleDto);
 
@@ -99,7 +92,7 @@ describe('RolesController', () => {
         },
       ];
 
-      mockRolesService.findAll.mockResolvedValue(mockRoles);
+      service.findAll.mockResolvedValue(mockRoles);
 
       // 2. ACTUAR
       const result = await controller.findAll();
@@ -107,12 +100,20 @@ describe('RolesController', () => {
       // 3. VERIFICAR
       expect(result).toEqual(mockRoles);
       expect(service.findAll).toHaveBeenCalledTimes(1);
-      expect(service.findAll).toHaveBeenCalledWith();
+      expect(service.findAll).toHaveBeenCalledWith(false);
+    });
+
+    it('debería solicitar includePermissions=true cuando llega en query', async () => {
+      service.findAll.mockResolvedValue([]);
+
+      await controller.findAll('true');
+
+      expect(service.findAll).toHaveBeenCalledWith(true);
     });
 
     it('debería retornar una lista vacía si no hay roles', async () => {
       const mockRoles: Role[] = [];
-      mockRolesService.findAll.mockResolvedValue(mockRoles);
+      service.findAll.mockResolvedValue(mockRoles);
 
       const result = await controller.findAll();
 
@@ -131,27 +132,41 @@ describe('RolesController', () => {
         description: 'Admin role',
       };
 
-      mockRolesService.findById.mockResolvedValue(mockRole);
+      service.findById.mockResolvedValue(mockRole);
 
       // 2. ACTUAR
       const result = await controller.findOne(roleId);
 
       // 3. VERIFICAR
       expect(result).toEqual(mockRole);
-      expect(service.findById).toHaveBeenCalledWith(roleId);
+      expect(service.findById).toHaveBeenCalledWith(roleId, false);
       expect(service.findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('debería solicitar includePermissions=true para findOne cuando llega en query', async () => {
+      const roleId = 'uuid-123';
+      const mockRole: Role = {
+        id: roleId,
+        name: 'ADMIN',
+        description: 'Admin role',
+      };
+      service.findById.mockResolvedValue(mockRole);
+
+      await controller.findOne(roleId, 'true');
+
+      expect(service.findById).toHaveBeenCalledWith(roleId, true);
     });
 
     it('debería lanzar un error si el rol no existe', async () => {
       const roleId = 'uuid-no-existe';
       const error = new Error('Role not found');
 
-      mockRolesService.findById.mockRejectedValue(error);
+      service.findById.mockRejectedValue(error);
 
       await expect(controller.findOne(roleId)).rejects.toThrow(
         'Role not found',
       );
-      expect(service.findById).toHaveBeenCalledWith(roleId);
+      expect(service.findById).toHaveBeenCalledWith(roleId, false);
     });
   });
 
@@ -169,7 +184,7 @@ describe('RolesController', () => {
         description: updateRoleDto.description ?? null,
       };
 
-      mockRolesService.update.mockResolvedValue(updatedRole);
+      service.update.mockResolvedValue(updatedRole);
 
       // 2. ACTUAR
       const result = await controller.update(roleId, updateRoleDto);
@@ -191,7 +206,7 @@ describe('RolesController', () => {
         description: updateRoleDto.description ?? null,
       };
 
-      mockRolesService.update.mockResolvedValue(updatedRole);
+      service.update.mockResolvedValue(updatedRole);
 
       const result = await controller.update(roleId, updateRoleDto);
 
@@ -206,7 +221,7 @@ describe('RolesController', () => {
       };
       const error = new Error('Role not found');
 
-      mockRolesService.update.mockRejectedValue(error);
+      service.update.mockRejectedValue(error);
 
       await expect(controller.update(roleId, updateRoleDto)).rejects.toThrow(
         'Role not found',
@@ -225,7 +240,7 @@ describe('RolesController', () => {
         description: 'Admin role',
       };
 
-      mockRolesService.remove.mockResolvedValue(deletedRole);
+      service.remove.mockResolvedValue(deletedRole);
 
       // 2. ACTUAR
       const result = await controller.remove(roleId);
@@ -240,10 +255,38 @@ describe('RolesController', () => {
       const roleId = 'uuid-no-existe';
       const error = new Error('Role not found');
 
-      mockRolesService.remove.mockRejectedValue(error);
+      service.remove.mockRejectedValue(error);
 
       await expect(controller.remove(roleId)).rejects.toThrow('Role not found');
       expect(service.remove).toHaveBeenCalledWith(roleId);
+    });
+  });
+
+  describe('updatePermissions', () => {
+    it('debería actualizar permisos del rol', async () => {
+      const roleId = 'uuid-role-1';
+      const dto: UpdateRolePermissionsDto = {
+        permissionIds: ['uuid-perm-1', 'uuid-perm-2'],
+      };
+      const updatedRole = {
+        id: roleId,
+        name: 'ADMIN',
+        description: 'Admin role',
+        permissions: [
+          { id: 'uuid-perm-1', name: 'USER:VIEW', description: null },
+          { id: 'uuid-perm-2', name: 'USER:CREATE', description: null },
+        ],
+      };
+
+      service.updatePermissions.mockResolvedValue(updatedRole as never);
+
+      const result = await controller.updatePermissions(roleId, dto);
+
+      expect(result).toEqual(updatedRole);
+      expect(service.updatePermissions).toHaveBeenCalledWith(
+        roleId,
+        dto.permissionIds,
+      );
     });
   });
 });

@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RolesService } from './roles.service';
 import { Prisma } from '@prisma/client';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
-import { PermissionsService } from './permissions.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 describe('RolesService', () => {
   let service: RolesService;
   let prisma: DeepMockProxy<PrismaService>;
-  let permissionsService: DeepMockProxy<PermissionsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,16 +16,11 @@ describe('RolesService', () => {
           provide: PrismaService,
           useValue: mockDeep<PrismaService>(),
         },
-        {
-          provide: PermissionsService,
-          useValue: mockDeep<PermissionsService>(),
-        },
       ],
     }).compile();
 
     service = module.get<RolesService>(RolesService);
     prisma = module.get(PrismaService);
-    permissionsService = module.get(PermissionsService);
   });
 
   it('should be defined', () => {
@@ -36,7 +29,6 @@ describe('RolesService', () => {
 
   describe('findByName', () => {
     it('debería retornar un rol si existe', async () => {
-      // 1. PREPARAR (Arrange)
       const roleName = 'ADMIN';
       const mockRole = {
         id: 'uuid-123',
@@ -44,44 +36,50 @@ describe('RolesService', () => {
         description: 'Admin role',
       };
 
-      // Le decimos al mock: "Cuando te pidan findUnique, devuelve este objeto"
       prisma.role.findUniqueOrThrow.mockResolvedValue(mockRole);
 
-      // 2. ACTUAR (Act)
       const result = await service.findByName(roleName);
 
-      // 3. VERIFICAR (Assert)
-      expect(result).toEqual(mockRole); // Que devuelva el objeto correcto
+      expect(result).toEqual(mockRole);
       expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
-        // Que haya llamado a Prisma con el where correcto
         where: { name: roleName },
+        include: { permissions: true },
       });
     });
 
     it('debería lanzar un error de Prisma si el rol no existe', async () => {
-      // 1. PREPARAR
       const roleName = 'GHOST_ROLE';
 
-      // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
         { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
-      // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.role.findUniqueOrThrow.mockRejectedValue(prismaError);
 
-      // 2. ACTUAR Y VERIFICAR
-      // Esperamos que explote con el error nativo de Prisma
       await expect(service.findByName(roleName)).rejects.toThrow(
         Prisma.PrismaClientKnownRequestError,
       );
+    });
+
+    it('debería permitir includePermissions en false', async () => {
+      prisma.role.findUniqueOrThrow.mockResolvedValue({
+        id: 'uuid-123',
+        name: 'ADMIN',
+        description: 'Admin role',
+      });
+
+      await service.findByName('ADMIN', false);
+
+      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { name: 'ADMIN' },
+        include: { permissions: false },
+      });
     });
   });
 
   describe('findById', () => {
     it('debería retornar un rol si existe', async () => {
-      // 1. PREPARAR (Arrange)
       const roleId = 'uuid-123';
       const mockRole = {
         id: roleId,
@@ -89,38 +87,45 @@ describe('RolesService', () => {
         description: 'Admin role',
       };
 
-      // Le decimos al mock: "Cuando te pidan findUniqueOrThrow, devuelve este objeto"
       prisma.role.findUniqueOrThrow.mockResolvedValue(mockRole);
 
-      // 2. ACTUAR (Act)
       const result = await service.findById(roleId);
 
-      // 3. VERIFICAR (Assert)
-      expect(result).toEqual(mockRole); // Que devuelva el objeto correcto
+      expect(result).toEqual(mockRole);
       expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
-        // Que haya llamado a Prisma con el where correcto
         where: { id: roleId },
+        include: { permissions: false },
       });
     });
 
     it('debería lanzar un error de Prisma si el rol no existe', async () => {
-      // 1. PREPARAR
       const roleId = 'uuid-no-existe';
 
-      // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
         { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
-      // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.role.findUniqueOrThrow.mockRejectedValue(prismaError);
 
-      // 2. ACTUAR Y VERIFICAR
-      // Esperamos que explote con el error nativo de Prisma
       await expect(service.findById(roleId)).rejects.toThrow(
         Prisma.PrismaClientKnownRequestError,
       );
+    });
+
+    it('debería permitir includePermissions en true', async () => {
+      prisma.role.findUniqueOrThrow.mockResolvedValue({
+        id: 'uuid-123',
+        name: 'ADMIN',
+        description: 'Admin role',
+      });
+
+      await service.findById('uuid-123', true);
+
+      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        include: { permissions: true },
+      });
     });
   });
 
@@ -198,6 +203,11 @@ describe('RolesService', () => {
       prisma.role.findMany.mockResolvedValue(mockRoles);
       const result = await service.findAll();
       expect(result).toEqual(mockRoles);
+      expect(prisma.role.findMany).toHaveBeenCalledWith({
+        include: {
+          permissions: false,
+        },
+      });
       expect(prisma.role.findMany).toHaveBeenCalledTimes(1);
     });
 
@@ -209,6 +219,18 @@ describe('RolesService', () => {
 
       expect(result).toEqual(mockRoles);
       expect(prisma.role.findMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('debería incluir permisos cuando se solicita', async () => {
+      prisma.role.findMany.mockResolvedValue([]);
+
+      await service.findAll(true);
+
+      expect(prisma.role.findMany).toHaveBeenCalledWith({
+        include: {
+          permissions: true,
+        },
+      });
     });
   });
 
@@ -359,121 +381,6 @@ describe('RolesService', () => {
     });
   });
 
-  describe('addPermission', () => {
-    it('debería agregar un permiso a un rol correctamente', async () => {
-      // 1. PREPARAR
-      const roleId = 'uuid-123';
-      const permissionId = 'uuid-perm-1';
-      const mockPermission = {
-        id: permissionId,
-        name: 'users.create',
-        description: 'Permission to create users',
-      };
-      const updatedRole = {
-        id: roleId,
-        name: 'ADMIN',
-        description: 'Admin role',
-        permissions: [mockPermission],
-      };
-
-      prisma.role.update.mockResolvedValue(updatedRole);
-
-      // 2. ACTUAR
-      const result = await service.addPermission(roleId, permissionId);
-
-      // 3. VERIFICAR
-      expect(result).toEqual(updatedRole);
-      expect(prisma.role.update).toHaveBeenCalledWith({
-        where: { id: roleId },
-        data: {
-          permissions: {
-            connect: { id: permissionId },
-          },
-        },
-        include: { permissions: true },
-      });
-    });
-
-    it('debería lanzar un error si el rol no existe', async () => {
-      const roleId = 'uuid-no-existe';
-      const permissionId = 'uuid-perm-1';
-      const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025',
-        clientVersion: '5.0',
-      } as any);
-
-      prisma.role.update.mockRejectedValue(error);
-
-      await expect(service.addPermission(roleId, permissionId)).rejects.toThrow(
-        Prisma.PrismaClientKnownRequestError,
-      );
-      expect(prisma.role.update).toHaveBeenCalledWith({
-        where: { id: roleId },
-        data: {
-          permissions: {
-            connect: { id: permissionId },
-          },
-        },
-        include: { permissions: true },
-      });
-    });
-  });
-
-  describe('removePermission', () => {
-    it('debería remover un permiso de un rol correctamente', async () => {
-      // 1. PREPARAR
-      const roleId = 'uuid-123';
-      const permissionId = 'uuid-perm-1';
-      const updatedRole = {
-        id: roleId,
-        name: 'ADMIN',
-        description: 'Admin role',
-        permissions: [],
-      };
-
-      prisma.role.update.mockResolvedValue(updatedRole);
-
-      // 2. ACTUAR
-      const result = await service.removePermission(roleId, permissionId);
-
-      // 3. VERIFICAR
-      expect(result).toEqual(updatedRole);
-      expect(prisma.role.update).toHaveBeenCalledWith({
-        where: { id: roleId },
-        data: {
-          permissions: {
-            disconnect: { id: permissionId },
-          },
-        },
-        include: { permissions: true },
-      });
-    });
-
-    it('debería lanzar un error si el rol no existe', async () => {
-      const roleId = 'uuid-no-existe';
-      const permissionId = 'uuid-perm-1';
-      const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025',
-        clientVersion: '5.0',
-      } as any);
-
-      prisma.role.update.mockRejectedValue(error);
-
-      await expect(
-        service.removePermission(roleId, permissionId),
-      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
-      expect(prisma.role.update).toHaveBeenCalledWith({
-        where: { id: roleId },
-        data: {
-          permissions: {
-            disconnect: { id: permissionId },
-          },
-        },
-        include: { permissions: true },
-      });
-    });
-  });
-
   describe('updatePermissions', () => {
     it('debería actualizar todos los permisos de un rol correctamente', async () => {
       // 1. PREPARAR
@@ -509,8 +416,7 @@ describe('RolesService', () => {
         where: { id: roleId },
         data: {
           permissions: {
-            set: [],
-            connect: permissionIds.map((id) => ({ id })),
+            set: permissionIds.map((id) => ({ id })),
           },
         },
         include: { permissions: true },
@@ -537,7 +443,6 @@ describe('RolesService', () => {
         data: {
           permissions: {
             set: [],
-            connect: [],
           },
         },
         include: { permissions: true },
@@ -561,8 +466,7 @@ describe('RolesService', () => {
         where: { id: roleId },
         data: {
           permissions: {
-            set: [],
-            connect: permissionIds.map((id) => ({ id })),
+            set: permissionIds.map((id) => ({ id })),
           },
         },
         include: { permissions: true },
