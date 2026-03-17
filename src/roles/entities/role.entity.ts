@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "@prisma/client";
+import { Permission, Role } from "@prisma/client";
 
 export class RoleEntity implements Role {
 	@ApiProperty({
@@ -19,4 +19,18 @@ export class RoleEntity implements Role {
 		example: 'Admin role',
 	})
 	description: string | null;
+
+	@ApiProperty({
+		description: 'The level of the role (higher means more permissions)',
+		example: 1,
+	})
+	level: number;
+}
+
+export class RoleWithPermissionsEntity extends RoleEntity {
+	@ApiProperty({
+		description: 'The permissions associated with the role',
+		isArray: true,
+	})
+	permissions: Permission[];
 }

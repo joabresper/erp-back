@@ -3,7 +3,40 @@ import { PrismaService } from '../src/prisma/prisma.service';
 
 const prisma = new PrismaService();
 
+const PERMISSIONS_LIST = [
+  { name: 'USER:CREATE', description: 'Permite crear nuevos usuarios' },
+  { name: 'USER:UPDATE', description: 'Permite modificar usuarios existentes' },
+  { name: 'USER:DELETE', description: 'Permite eliminar usuarios' },
+  { name: 'USER:VIEW', description: 'Permite ver la lista de usuarios' },
+  { name: 'USER:VIEW_DELETED', description: 'Permite ver usuarios eliminados' },
+  { name: 'USER:RESTORE', description: 'Permite restaurar usuarios eliminados' },
+
+  { name: 'ROLE:CREATE', description: 'Permite crear roles' },
+  { name: 'ROLE:UPDATE', description: 'Permite modificar roles existentes' },
+  { name: 'ROLE:DELETE', description: 'Permite eliminar roles' },
+  { name: 'ROLE:VIEW', description: 'Permite ver la lista de roles' },
+
+  { name: 'PERMISSION:VIEW', description: 'Permite ver la lista de permisos' },
+
+  { name: 'ROLE:UPDATE_PERMISSIONS', description: 'Permite modificar los permisos de los roles' },
+  { name: 'USER:UPDATE_ROLE', description: 'Permite modificar el rol de los usuarios' },
+
+  { name: 'PROFILE:VIEW', description: 'Permite ver el perfil propio' },
+  { name: 'PROFILE:UPDATE', description: 'Permite actualizar el perfil propio' },
+];
+
 async function main() {
+  // 0. Crear los permisos
+  for (const perm of PERMISSIONS_LIST) {
+    await prisma.permission.upsert({
+      where: { name: perm.name },
+      update: { description: perm.description },
+      create: { name: perm.name, description: perm.description },
+    });
+  }
+  console.log(`✅ Permisos creados/asegurados: ${PERMISSIONS_LIST.length}`);
+  const allPermissions = await prisma.permission.findMany();
+
   // 1. Crear (o asegurar) el Rol "USER" (Sin permisos por defecto)
   const userRole = await prisma.role.upsert({
     where: { name: 'USER' },
@@ -11,6 +44,7 @@ async function main() {
     create: {
       name: 'USER',
       description: 'Rol por defecto para nuevos usuarios',
+      level: 1,
     },
   });
   console.log(`✅ Rol creado/asegurado: ${userRole.name}`);
@@ -18,10 +52,19 @@ async function main() {
   // 2. Crear (o asegurar) el Rol "ADMIN" (Para tu usuario principal)
   const adminRole = await prisma.role.upsert({
     where: { name: 'ADMIN' },
-    update: {},
+    update: {
+      level: 100,
+      permissions: {
+        set: allPermissions.map((perm) => ({ id: perm.id })),
+      },
+    },
     create: {
       name: 'ADMIN',
       description: 'Administrador del sistema',
+      level: 100,
+      permissions: {
+        connect: allPermissions.map((perm) => ({ id: perm.id })),
+      },
     },
   });
   console.log(`✅ Rol creado/asegurado: ${adminRole.name}`);

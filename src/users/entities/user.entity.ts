@@ -57,3 +57,6 @@ export class User {
 export class UserWithRole extends User {
 	role: Role
 }
+
+export interface UserWithoutPasswordWithRole extends Omit<UserWithRole, 'password'> {
+}

@@ -16,8 +16,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Esto es lo que NestJS inyecta en 'req.user' en todos los controladores.
     return { 
-      userId: payload.sub,
-      role: payload.role 
+      id: payload.sub,
+      role: payload.role,
+      level: payload.level
     };
   }
 }

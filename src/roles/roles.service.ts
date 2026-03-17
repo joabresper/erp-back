@@ -1,15 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from '@prisma/client';
-import { PermissionsService } from './permissions.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RoleWithPermissionsEntity } from './entities/role.entity';
 
 @Injectable()
 export class RolesService {
   constructor(
-    private prismaService: PrismaService,
-    private permissionsService: PermissionsService,
+    private prismaService: PrismaService
   ) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
@@ -18,19 +17,32 @@ export class RolesService {
     });
   }
 
-  async findAll(): Promise<Role[]> {
-    return await this.prismaService.role.findMany();
-  }
-
-  async findByName(name: string): Promise<Role> {
-    return await this.prismaService.role.findUniqueOrThrow({
-      where: { name },
+  async findAll(includePermissions: boolean = false): Promise<Role[]> {
+    return await this.prismaService.role.findMany({
+      include: {
+        permissions: includePermissions,
+      },
     });
   }
 
-  async findById(id: string): Promise<Role> {
+  async findByName(name: string, includePermissions: boolean): Promise<RoleWithPermissionsEntity>;
+  async findByName(name: string): Promise<Role>;
+  async findByName(name: string, includePermissions: boolean = true): Promise<Role | RoleWithPermissionsEntity> {
+    return await this.prismaService.role.findUniqueOrThrow({
+      where: { name },
+      include: {
+        permissions: includePermissions,
+      },
+    });
+  }
+  async findById(id: string, includePermissions: boolean): Promise<RoleWithPermissionsEntity>;
+  async findById(id: string): Promise<Role>;
+  async findById(id: string, includePermissions: boolean = false): Promise<Role | RoleWithPermissionsEntity> {
     return await this.prismaService.role.findUniqueOrThrow({
       where: { id },
+      include: {
+        permissions: includePermissions,
+      },
     });
   }
 
@@ -48,37 +60,12 @@ export class RolesService {
   }
 
   // Permissions methods
-  async addPermission(roleId: string, permissionId: string) {
-    return await this.prismaService.role.update({
-      where: { id: roleId },
-      data: {
-        permissions: {
-          connect: { id: permissionId }
-        }
-      },
-      include: { permissions: true },
-    })
-  }
-
-  async removePermission(roleId: string, permissionId: string) {
-    return await this.prismaService.role.update({
-      where: { id: roleId },
-      data: {
-        permissions: {
-          disconnect: { id: permissionId }
-        }
-      },
-      include: { permissions: true },
-    })
-  }
-
   async updatePermissions(roleId: string, permissionIds: string[]) {
     return this.prismaService.role.update({
       where: { id: roleId },
       data: {
         permissions: {
-          set: [],
-          connect: permissionIds.map((id) => ({ id })),
+          set: permissionIds.map((id) => ({ id })),
         },
       },
       include: { permissions: true },
