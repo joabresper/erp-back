@@ -8,6 +8,8 @@ const PERMISSIONS_LIST = [
   { name: 'USER:UPDATE', description: 'Permite modificar usuarios existentes' },
   { name: 'USER:DELETE', description: 'Permite eliminar usuarios' },
   { name: 'USER:VIEW', description: 'Permite ver la lista de usuarios' },
+  { name: 'USER:VIEW_DELETED', description: 'Permite ver usuarios eliminados' },
+  { name: 'USER:RESTORE', description: 'Permite restaurar usuarios eliminados' },
 
   { name: 'ROLE:CREATE', description: 'Permite crear roles' },
   { name: 'ROLE:UPDATE', description: 'Permite modificar roles existentes' },

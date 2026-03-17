@@ -29,6 +29,14 @@ export class UsersController {
     const includeRoleFlag = includeRole === 'true';
     return this.usersService.findAll(includeRoleFlag);
   }
+  
+  @Get('deleted')
+  @RequirePermissions('USER:VIEW_DELETED')
+  @ApiOperation({ summary: 'Get all deleted users' })
+  @ApiResponse({ status: 200, description: 'List of deleted users retrieved successfully.' })
+  findAllDeleted() {
+    return this.usersService.findAllDeleted();
+  }
 
   @Get(':id')
   @RequirePermissions('USER:VIEW')
@@ -67,5 +75,14 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Patch(':id/restore')
+  @RequirePermissions('USER:RESTORE')
+  @ApiOperation({ summary: 'Restore a deleted user' })
+  @ApiResponse({ status: 200, description: 'The user has been successfully restored.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  restore(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.restore(id);
   }
 }

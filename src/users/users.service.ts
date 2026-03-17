@@ -121,9 +121,18 @@ export class UsersService {
   }
 
   async restore(id: string) {
+    const defaultRole = await this.rolesService.findByName('USER');
+    if (!defaultRole) {
+      throw new InternalServerErrorException('The system is not configured correctly (Missing default role).');
+    }
     return await this.prismaService.user.update({
       where: { id },
-      data: { deletedAt: null }
+      data: {
+        deletedAt: null,
+        role: {
+          connect: { id: defaultRole.id }
+        },
+      }
     });
   }
 
