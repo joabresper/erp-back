@@ -1,5 +1,10 @@
 // src/common/filters/prisma-client-exception.filter.ts
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
@@ -24,7 +29,7 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
         break;
       }
 
-	  // P2003: Foreign key constraint failed
+      // P2003: Foreign key constraint failed
       case 'P2003': {
         const status = HttpStatus.CONFLICT; // 409
         const fieldName = (exception.meta as any)?.field_name;
@@ -32,7 +37,7 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
           statusCode: status,
           message: `Relaciones de datos en conflicto (Campo afectado: ${fieldName}).`,
           error: 'Bad Request',
-		  // Si es DELETE, hay hijos asociados. Si es CREATE, el padre no existe.
+          // Si es DELETE, hay hijos asociados. Si es CREATE, el padre no existe.
         });
         break;
       }

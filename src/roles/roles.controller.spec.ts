@@ -148,7 +148,9 @@ describe('RolesController', () => {
 
       mockRolesService.findById.mockRejectedValue(error);
 
-      await expect(controller.findOne(roleId)).rejects.toThrow('Role not found');
+      await expect(controller.findOne(roleId)).rejects.toThrow(
+        'Role not found',
+      );
       expect(service.findById).toHaveBeenCalledWith(roleId);
     });
   });
@@ -206,7 +208,9 @@ describe('RolesController', () => {
 
       mockRolesService.update.mockRejectedValue(error);
 
-      await expect(controller.update(roleId, updateRoleDto)).rejects.toThrow('Role not found');
+      await expect(controller.update(roleId, updateRoleDto)).rejects.toThrow(
+        'Role not found',
+      );
       expect(service.update).toHaveBeenCalledWith(roleId, updateRoleDto);
     });
   });

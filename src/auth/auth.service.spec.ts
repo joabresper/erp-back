@@ -49,20 +49,28 @@ describe('AuthService', () => {
       hashingService.compare!.mockResolvedValue(true);
       jwtService.signAsync!.mockResolvedValue('token123');
 
-      await expect(service.signIn(dto as any)).resolves.toEqual({ accessToken: 'token123' });
+      await expect(service.signIn(dto as any)).resolves.toEqual({
+        accessToken: 'token123',
+      });
 
       expect(usersService.findByEmail).toHaveBeenCalledWith(dto.email);
-      expect(hashingService.compare).toHaveBeenCalledWith(dto.password, user.password);
-      expect(jwtService.signAsync).toHaveBeenCalledWith({ sub: user.id, role: user.role.name });
+      expect(hashingService.compare).toHaveBeenCalledWith(
+        dto.password,
+        user.password,
+      );
+      expect(jwtService.signAsync).toHaveBeenCalledWith({
+        sub: user.id,
+        role: user.role.name,
+      });
     });
 
     it('signIn lanza UnauthorizedException cuando no se encuentra el usuario', async () => {
       usersService.findByEmail!.mockResolvedValue(null);
       jwtService.signAsync!.mockResolvedValue('should-not-be-called');
 
-      await expect(service.signIn({ email: 'no@one.com', password: 'x' } as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.signIn({ email: 'no@one.com', password: 'x' } as any),
+      ).rejects.toThrow(UnauthorizedException);
 
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -72,9 +80,9 @@ describe('AuthService', () => {
       usersService.findByEmail!.mockResolvedValue(user);
       hashingService.compare!.mockResolvedValue(false);
 
-      await expect(service.signIn({ email: 'a@b.com', password: 'wrong' } as any)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.signIn({ email: 'a@b.com', password: 'wrong' } as any),
+      ).rejects.toThrow(UnauthorizedException);
 
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });

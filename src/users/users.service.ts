@@ -1,4 +1,10 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesService } from 'src/roles/roles.service';
@@ -13,29 +19,38 @@ export class UsersService {
   constructor(
     private prismaService: PrismaService,
     private rolesService: RolesService,
-    private hashingService: HashingService
+    private hashingService: HashingService,
   ) {}
 
-  async create(creatorLevel: number, createUserDto: CreateUserDto): Promise<User> {
+  async create(
+    creatorLevel: number,
+    createUserDto: CreateUserDto,
+  ): Promise<User> {
     const { password, ...userData } = createUserDto;
     let roleId = createUserDto.roleId;
 
     if (!roleId) {
       const defaultRole = await this.rolesService.findByName('USER');
-      
+
       if (!defaultRole) {
-        throw new InternalServerErrorException('The system is not configured correctly (Missing default role).');
+        throw new InternalServerErrorException(
+          'The system is not configured correctly (Missing default role).',
+        );
       }
       roleId = defaultRole.id;
     }
     const role = await this.rolesService.findById(roleId);
     if (!role) {
-      throw new InternalServerErrorException(`The role with ID ${roleId} does not exist.`);
+      throw new InternalServerErrorException(
+        `The role with ID ${roleId} does not exist.`,
+      );
     }
 
     // Verificamos que el usuario que crea el nuevo usuario tenga permisos para asignar el rol solicitado
     if (creatorLevel <= role.level) {
-      throw new UnauthorizedException('You do not have permission to create a user with this role.');
+      throw new UnauthorizedException(
+        'You do not have permission to create a user with this role.',
+      );
     }
 
     const hashedPassword = await this.hashingService.hash(password);
@@ -46,17 +61,17 @@ export class UsersService {
         password: hashedPassword,
         email: userData.email,
         role: {
-          connect: { id: roleId }
-        }
+          connect: { id: roleId },
+        },
       },
-      include: { role: true }
+      include: { role: true },
     });
   }
 
   async findAll(includeRole: boolean): Promise<User[] | UserWithRole[]> {
     return await this.prismaService.user.findMany({
       where: { deletedAt: null },
-      include: { role: includeRole }
+      include: { role: includeRole },
     });
   }
 
@@ -64,7 +79,7 @@ export class UsersService {
     return await this.prismaService.user.findFirstOrThrow({
       where: {
         id,
-        deletedAt: null
+        deletedAt: null,
       },
     });
   }
@@ -74,7 +89,7 @@ export class UsersService {
       where: {
         id,
       },
-      include: { role: true }
+      include: { role: true },
     });
   }
 
@@ -82,10 +97,10 @@ export class UsersService {
     return await this.prismaService.user.findFirstOrThrow({
       where: {
         email,
-        deletedAt: null
+        deletedAt: null,
       },
-      include: { role: true }
-    })
+      include: { role: true },
+    });
   }
 
   // TODO: la modificacion del email se realiza en otro metodo con toras verificaciones
@@ -93,9 +108,9 @@ export class UsersService {
     return await this.prismaService.user.update({
       where: {
         id,
-        deletedAt: null
+        deletedAt: null,
       },
-      data: updateUserDto
+      data: updateUserDto,
     });
   }
 
@@ -104,56 +119,66 @@ export class UsersService {
     return await this.prismaService.user.update({
       where: {
         id,
-        deletedAt: null
+        deletedAt: null,
       },
       data: {
         deletedAt: new Date(),
-      }
+      },
     });
   }
 
   async findAllDeleted(): Promise<User[]> {
     return await this.prismaService.user.findMany({
       where: {
-        deletedAt: { not: null }
-      }
-    })
+        deletedAt: { not: null },
+      },
+    });
   }
 
   async restore(id: string) {
     const defaultRole = await this.rolesService.findByName('USER');
     if (!defaultRole) {
-      throw new InternalServerErrorException('The system is not configured correctly (Missing default role).');
+      throw new InternalServerErrorException(
+        'The system is not configured correctly (Missing default role).',
+      );
     }
     return await this.prismaService.user.update({
       where: { id },
       data: {
         deletedAt: null,
         role: {
-          connect: { id: defaultRole.id }
+          connect: { id: defaultRole.id },
         },
-      }
+      },
     });
   }
 
-  async changeRole(id: string, creatorLevel: number, changeUserRoleDto: ChangeUserRoleDto) {
+  async changeRole(
+    id: string,
+    creatorLevel: number,
+    changeUserRoleDto: ChangeUserRoleDto,
+  ) {
     const role = await this.rolesService.findById(changeUserRoleDto.roleId);
     if (!role) {
-      throw new NotFoundException(`The role with ID ${changeUserRoleDto.roleId} does not exist.`);
+      throw new NotFoundException(
+        `The role with ID ${changeUserRoleDto.roleId} does not exist.`,
+      );
     }
 
     if (creatorLevel <= role.level) {
-      throw new ForbiddenException('You do not have permission to assign this role to the user.');
+      throw new ForbiddenException(
+        'You do not have permission to assign this role to the user.',
+      );
     }
 
     return await this.prismaService.user.update({
       where: { id },
       data: {
         role: {
-          connect: { id: changeUserRoleDto.roleId }
-        }
+          connect: { id: changeUserRoleDto.roleId },
+        },
       },
-      include: { role: true }
+      include: { role: true },
     });
   }
 }

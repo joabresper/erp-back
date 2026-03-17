@@ -13,12 +13,12 @@ import { HierarchyGuard } from './common/guards/hierarchy.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, 
+      isGlobal: true,
     }),
     PrismaModule,
     UsersModule,
     RolesModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -34,7 +34,7 @@ import { HierarchyGuard } from './common/guards/hierarchy.guard';
     {
       provide: 'APP_GUARD',
       useClass: HierarchyGuard,
-    }
+    },
   ],
 })
 export class AppModule {}

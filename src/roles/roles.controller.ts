@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto, UpdateRolePermissionsDto } from './dto/update-role.dto';
@@ -14,8 +25,15 @@ export class RolesController {
   @RequirePermissions('ROLE:CREATE')
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Create a new role' })
-  @ApiResponse({ status: 201, description: 'The role has been successfully created.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. You do not have permission to create a role with the specified level.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The role has been successfully created.',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden. You do not have permission to create a role with the specified level.',
+  })
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
@@ -23,7 +41,10 @@ export class RolesController {
   @Get()
   @RequirePermissions('ROLE:VIEW')
   @ApiOperation({ summary: 'Get all roles' })
-  @ApiResponse({ status: 200, description: 'List of roles retrieved successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of roles retrieved successfully.',
+  })
   findAll(@Query('includePermissions') includePermissions?: string) {
     const includePerms = includePermissions === 'true';
     return this.rolesService.findAll(includePerms);
@@ -32,9 +53,15 @@ export class RolesController {
   @Get(':id')
   @RequirePermissions('ROLE:VIEW')
   @ApiOperation({ summary: 'Get role by ID' })
-  @ApiResponse({ status: 200, description: 'The role has been successfully retrieved.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully retrieved.',
+  })
   @ApiResponse({ status: 404, description: 'Role not found.' })
-  findOne(@Param('id') id: string, @Query('includePermissions') includePermissions?: string) {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('includePermissions') includePermissions?: string,
+  ) {
     const includePerms = includePermissions === 'true';
     return this.rolesService.findById(id, includePerms);
   }
@@ -43,10 +70,20 @@ export class RolesController {
   @RequirePermissions('ROLE:UPDATE')
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Update role information' })
-  @ApiResponse({ status: 200, description: 'The role has been successfully updated.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. You do not have permission to update a role to the specified level.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully updated.',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden. You do not have permission to update a role to the specified level.',
+  })
   @ApiResponse({ status: 404, description: 'Role not found.' })
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
     return this.rolesService.update(id, updateRoleDto);
   }
 
@@ -54,20 +91,35 @@ export class RolesController {
   @RequirePermissions('ROLE:DELETE')
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Delete a role' })
-  @ApiResponse({ status: 200, description: 'The role has been successfully deleted.' })
-  @ApiResponse({ status: 403, description: 'Forbidden. You do not have permission to delete this role.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role has been successfully deleted.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. You do not have permission to delete this role.',
+  })
   @ApiResponse({ status: 404, description: 'Role not found.' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.remove(id);
   }
-  
+
   @Patch(':id/permissions')
   @RequirePermissions('ROLE:UPDATE_PERMISSIONS')
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Update role permissions' })
-  @ApiResponse({ status: 200, description: 'The role permissions have been successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The role permissions have been successfully updated.',
+  })
   @ApiResponse({ status: 404, description: 'Role not found.' })
-  updatePermissions(@Param('id') id: string, @Body() updateRolePermissionsDto: UpdateRolePermissionsDto) {
-    return this.rolesService.updatePermissions(id, updateRolePermissionsDto.permissionIds);
+  updatePermissions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateRolePermissionsDto: UpdateRolePermissionsDto,
+  ) {
+    return this.rolesService.updatePermissions(
+      id,
+      updateRolePermissionsDto.permissionIds,
+    );
   }
 }

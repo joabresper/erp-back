@@ -18,7 +18,9 @@ describe('UsersService', () => {
   let hashingService: DeepMockProxy<HashingService>;
 
   // Factories para fixtures
-  const createUserDtoFactory = (overrides?: Partial<CreateUserDto>): CreateUserDto => ({
+  const createUserDtoFactory = (
+    overrides?: Partial<CreateUserDto>,
+  ): CreateUserDto => ({
     email: 'test@example.com',
     fullName: 'John Doe',
     password: 'password123',
@@ -26,17 +28,20 @@ describe('UsersService', () => {
     ...overrides,
   });
 
-  const mockRoleFactory = (overrides?: Partial<{ id: string; name: string; description: string }>) => ({
+  const mockRoleFactory = (
+    overrides?: Partial<{ id: string; name: string; description: string }>,
+  ) => ({
     id: 'uuid-role-123',
     name: 'ADMIN',
     description: 'Admin role',
     ...overrides,
   });
 
-  const hashedPasswordFactory = () => '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
+  const hashedPasswordFactory = () =>
+    '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012';
 
   const mockUserFactory = (
-    overrides?: Partial<User & { role: ReturnType<typeof mockRoleFactory> }>
+    overrides?: Partial<User & { role: ReturnType<typeof mockRoleFactory> }>,
   ): User & { role: ReturnType<typeof mockRoleFactory> } => ({
     id: 'uuid-user-123',
     email: 'test@example.com',
@@ -163,16 +168,18 @@ describe('UsersService', () => {
       rolesService.findByName.mockResolvedValue(null as any);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.create(createUserDto))
-        .rejects
-        .toThrow(InternalServerErrorException);
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        InternalServerErrorException,
+      );
       expect(rolesService.findByName).toHaveBeenCalledWith('USER');
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
     it('debería encriptar la contraseña antes de guardarla', async () => {
       // 1. PREPARAR
-      const createUserDto = createUserDtoFactory({ password: 'plainPassword123' });
+      const createUserDto = createUserDtoFactory({
+        password: 'plainPassword123',
+      });
       const hashedPassword = hashedPasswordFactory();
       const mockUser = mockUserFactory({
         email: createUserDto.email,
@@ -233,7 +240,9 @@ describe('UsersService', () => {
 
     it('debería lanzar un error si el email ya existe (duplicado)', async () => {
       // 1. PREPARAR
-      const createUserDto = createUserDtoFactory({ email: 'duplicate@example.com' });
+      const createUserDto = createUserDtoFactory({
+        email: 'duplicate@example.com',
+      });
       const hashedPassword = hashedPasswordFactory();
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
         code: 'P2002',
@@ -244,9 +253,9 @@ describe('UsersService', () => {
       prisma.user.create.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.create(createUserDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
 
     it('debería propagar el error si el hashing de la contraseña falla', async () => {
@@ -256,9 +265,9 @@ describe('UsersService', () => {
       hashingService.hash.mockRejectedValue(hashingError);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.create(createUserDto))
-        .rejects
-        .toThrow('Hashing failed');
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        'Hashing failed',
+      );
       expect(hashingService.hash).toHaveBeenCalledWith(createUserDto.password);
       expect(hashingService.hash).toHaveBeenCalledTimes(1);
       expect(prisma.user.create).not.toHaveBeenCalled();
@@ -382,15 +391,15 @@ describe('UsersService', () => {
 
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       prisma.user.findFirstOrThrow.mockRejectedValue(prismaError);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.findById(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findById(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           id: userId,
@@ -404,15 +413,15 @@ describe('UsersService', () => {
       const userId = 'uuid-user-123';
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       prisma.user.findFirstOrThrow.mockRejectedValue(prismaError);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.findById(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findById(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           id: userId,
@@ -454,15 +463,15 @@ describe('UsersService', () => {
 
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       prisma.user.findFirstOrThrow.mockRejectedValue(prismaError);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.findByEmail(userEmail))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findByEmail(userEmail)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           email: userEmail,
@@ -478,15 +487,15 @@ describe('UsersService', () => {
 
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       prisma.user.findFirstOrThrow.mockRejectedValue(prismaError);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.findByEmail(userEmail))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findByEmail(userEmail)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
           email: userEmail,
@@ -518,7 +527,7 @@ describe('UsersService', () => {
             deletedAt: null,
           },
           include: { role: true },
-        })
+        }),
       );
     });
   });
@@ -609,9 +618,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.update(userId, updateUserDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: {
           id: userId,
@@ -636,9 +645,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.update(userId, updateUserDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.update(userId, updateUserDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -688,9 +697,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.remove(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: {
           id: userId,
@@ -714,9 +723,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.remove(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -821,9 +830,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.restore(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.restore(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
         data: { deletedAt: null },
@@ -892,9 +901,9 @@ describe('UsersService', () => {
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.changeRole(userId, changeUserRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.changeRole(userId, changeUserRoleDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: userId },
         data: {
@@ -918,15 +927,15 @@ describe('UsersService', () => {
         {
           code: 'P2003',
           clientVersion: '5.0',
-        } as any
+        } as any,
       );
 
       prisma.user.update.mockRejectedValue(error);
 
       // 2. ACTUAR Y VERIFICAR
-      await expect(service.changeRole(userId, changeUserRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.changeRole(userId, changeUserRoleDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
     });
   });
 });

@@ -11,7 +11,7 @@ describe('PermissionsController', () => {
   const mockPermission = {
     id: '1',
     name: 'users.create',
-    description: 'Permission to create users'
+    description: 'Permission to create users',
   };
 
   const mockService = {
@@ -54,7 +54,7 @@ describe('PermissionsController', () => {
     it('should create a permission', async () => {
       const dto: CreatePermissionDto = {
         name: 'users.create',
-        description: 'Permission to create users'
+        description: 'Permission to create users',
       };
       expect(await controller.create(dto)).toEqual({
         id: expect.any(String),

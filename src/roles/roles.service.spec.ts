@@ -38,9 +38,9 @@ describe('RolesService', () => {
     it('debería retornar un rol si existe', async () => {
       // 1. PREPARAR (Arrange)
       const roleName = 'ADMIN';
-      const mockRole = { 
-        id: 'uuid-123', 
-        name: roleName, 
+      const mockRole = {
+        id: 'uuid-123',
+        name: roleName,
         description: 'Admin role',
       };
 
@@ -52,7 +52,8 @@ describe('RolesService', () => {
 
       // 3. VERIFICAR (Assert)
       expect(result).toEqual(mockRole); // Que devuelva el objeto correcto
-      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({ // Que haya llamado a Prisma con el where correcto
+      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
+        // Que haya llamado a Prisma con el where correcto
         where: { name: roleName },
       });
     });
@@ -60,21 +61,21 @@ describe('RolesService', () => {
     it('debería lanzar un error de Prisma si el rol no existe', async () => {
       // 1. PREPARAR
       const roleName = 'GHOST_ROLE';
-    
+
       // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
-    
+
       // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.role.findUniqueOrThrow.mockRejectedValue(prismaError);
-    
+
       // 2. ACTUAR Y VERIFICAR
       // Esperamos que explote con el error nativo de Prisma
-      await expect(service.findByName(roleName))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findByName(roleName)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -82,8 +83,8 @@ describe('RolesService', () => {
     it('debería retornar un rol si existe', async () => {
       // 1. PREPARAR (Arrange)
       const roleId = 'uuid-123';
-      const mockRole = { 
-        id: roleId, 
+      const mockRole = {
+        id: roleId,
         name: 'ADMIN',
         description: 'Admin role',
       };
@@ -96,7 +97,8 @@ describe('RolesService', () => {
 
       // 3. VERIFICAR (Assert)
       expect(result).toEqual(mockRole); // Que devuelva el objeto correcto
-      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({ // Que haya llamado a Prisma con el where correcto
+      expect(prisma.role.findUniqueOrThrow).toHaveBeenCalledWith({
+        // Que haya llamado a Prisma con el where correcto
         where: { id: roleId },
       });
     });
@@ -104,21 +106,21 @@ describe('RolesService', () => {
     it('debería lanzar un error de Prisma si el rol no existe', async () => {
       // 1. PREPARAR
       const roleId = 'uuid-no-existe';
-    
+
       // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
-    
+
       // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.role.findUniqueOrThrow.mockRejectedValue(prismaError);
-    
+
       // 2. ACTUAR Y VERIFICAR
       // Esperamos que explote con el error nativo de Prisma
-      await expect(service.findById(roleId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findById(roleId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -137,7 +139,7 @@ describe('RolesService', () => {
 
       const result = await service.create(dto);
       expect(result).toEqual(resultObj);
-      expect(prisma.role.create).toHaveBeenCalledWith({data: dto})
+      expect(prisma.role.create).toHaveBeenCalledWith({ data: dto });
     });
 
     it('deberia crear el rol solo con name (sin description)', async () => {
@@ -154,21 +156,22 @@ describe('RolesService', () => {
 
       const result = await service.create(dto);
       expect(result).toEqual(resultObj);
-      expect(prisma.role.create).toHaveBeenCalledWith({data: dto})
+      expect(prisma.role.create).toHaveBeenCalledWith({ data: dto });
     });
 
     it('deberia fallar la creacion si ya existe ', async () => {
       // 1. Simulamos que PRISMA explota con el error P2002
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
-        code: 'P2002', clientVersion: '5.0' 
+        code: 'P2002',
+        clientVersion: '5.0',
       } as any);
-    
+
       prisma.role.create.mockRejectedValue(error);
 
       // 2. Esperamos que el error de Prisma suba (el Filtro Global lo atrapará después)
-      await expect(service.create({ name: 'DUPLICADO' }))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.create({ name: 'DUPLICADO' })).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -178,18 +181,18 @@ describe('RolesService', () => {
         {
           id: 'uuid-1',
           name: 'ADMIN',
-          description: null
+          description: null,
         },
         {
           id: 'uuid-2',
           name: 'USER',
-          description: null
+          description: null,
         },
         {
           id: 'uuid-3',
           name: 'MANAGER',
-          description: null
-        }
+          description: null,
+        },
       ];
 
       prisma.role.findMany.mockResolvedValue(mockRoles);
@@ -214,12 +217,12 @@ describe('RolesService', () => {
       const roleId = 'uuid-123';
       const updateRoleDto = {
         name: 'NEW_NAME',
-        description: 'Nueva descripcion'
+        description: 'Nueva descripcion',
       };
       const updatedRole = {
         id: roleId,
         name: updateRoleDto.name,
-        description: updateRoleDto.description
+        description: updateRoleDto.description,
       };
 
       prisma.role.update.mockResolvedValue(updatedRole);
@@ -236,12 +239,12 @@ describe('RolesService', () => {
     it('deberia actualizar solo algunos campos (actualizacion parcial)', async () => {
       const roleId = 'uuid-123';
       const updateRoleDto = {
-        description: 'Solo actualizo la descripcion'
+        description: 'Solo actualizo la descripcion',
       };
       const updatedRole = {
         id: roleId,
         name: 'ADMIN', // Se mantiene el nombre original
-        description: updateRoleDto.description
+        description: updateRoleDto.description,
       };
 
       prisma.role.update.mockResolvedValue(updatedRole);
@@ -259,17 +262,18 @@ describe('RolesService', () => {
       const roleId = 'uuid-xxx';
       const updateRoleDto = {
         name: 'Nuevo',
-        description: 'desc'
+        description: 'desc',
       };
 
       const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025', clientVersion: '5.0'
+        code: 'P2025',
+        clientVersion: '5.0',
       } as any);
       prisma.role.update.mockRejectedValue(error);
 
-      await expect(service.update(roleId, updateRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.update(roleId, updateRoleDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.role.update).toHaveBeenCalledWith({
         where: { id: roleId },
         data: updateRoleDto,
@@ -283,13 +287,14 @@ describe('RolesService', () => {
       };
 
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
-        code: 'P2002', clientVersion: '5.0' 
+        code: 'P2002',
+        clientVersion: '5.0',
       } as any);
       prisma.role.update.mockRejectedValue(error);
 
-      await expect(service.update(roleId, updateRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.update(roleId, updateRoleDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.role.update).toHaveBeenCalledWith({
         where: { id: roleId },
         data: updateRoleDto,
@@ -303,7 +308,7 @@ describe('RolesService', () => {
       const deletedRole = {
         id: roleId,
         name: 'USER',
-        description: 'Descripcion usuario'
+        description: 'Descripcion usuario',
       };
 
       prisma.role.delete.mockResolvedValue(deletedRole);
@@ -319,14 +324,15 @@ describe('RolesService', () => {
     it('debería lanzar un error si el rol no existe', async () => {
       const roleId = 'uuid-no-existe';
       const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025', clientVersion: '5.0'
+        code: 'P2025',
+        clientVersion: '5.0',
       } as any);
 
       prisma.role.delete.mockRejectedValue(error);
 
-      await expect(service.remove(roleId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(roleId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.role.delete).toHaveBeenCalledWith({
         where: { id: roleId },
       });
@@ -334,15 +340,19 @@ describe('RolesService', () => {
 
     it('debería lanzar un error si el rol tiene relaciones (foreign key constraint)', async () => {
       const roleId = 'uuid-con-relaciones';
-      const error = new Prisma.PrismaClientKnownRequestError('Foreign key constraint failed', {
-        code: 'P2003', clientVersion: '5.0'
-      } as any);
+      const error = new Prisma.PrismaClientKnownRequestError(
+        'Foreign key constraint failed',
+        {
+          code: 'P2003',
+          clientVersion: '5.0',
+        } as any,
+      );
 
       prisma.role.delete.mockRejectedValue(error);
 
-      await expect(service.remove(roleId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(roleId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.role.delete).toHaveBeenCalledWith({
         where: { id: roleId },
       });
@@ -388,14 +398,15 @@ describe('RolesService', () => {
       const roleId = 'uuid-no-existe';
       const permissionId = 'uuid-perm-1';
       const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025', clientVersion: '5.0'
+        code: 'P2025',
+        clientVersion: '5.0',
       } as any);
 
       prisma.role.update.mockRejectedValue(error);
 
-      await expect(service.addPermission(roleId, permissionId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.addPermission(roleId, permissionId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.role.update).toHaveBeenCalledWith({
         where: { id: roleId },
         data: {
@@ -442,14 +453,15 @@ describe('RolesService', () => {
       const roleId = 'uuid-no-existe';
       const permissionId = 'uuid-perm-1';
       const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025', clientVersion: '5.0'
+        code: 'P2025',
+        clientVersion: '5.0',
       } as any);
 
       prisma.role.update.mockRejectedValue(error);
 
-      await expect(service.removePermission(roleId, permissionId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.removePermission(roleId, permissionId),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
       expect(prisma.role.update).toHaveBeenCalledWith({
         where: { id: roleId },
         data: {
@@ -536,14 +548,15 @@ describe('RolesService', () => {
       const roleId = 'uuid-no-existe';
       const permissionIds = ['uuid-perm-1'];
       const error = new Prisma.PrismaClientKnownRequestError('Role not found', {
-        code: 'P2025', clientVersion: '5.0'
+        code: 'P2025',
+        clientVersion: '5.0',
       } as any);
 
       prisma.role.update.mockRejectedValue(error);
 
-      await expect(service.updatePermissions(roleId, permissionIds))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.updatePermissions(roleId, permissionIds),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
       expect(prisma.role.update).toHaveBeenCalledWith({
         where: { id: roleId },
         data: {
@@ -556,5 +569,4 @@ describe('RolesService', () => {
       });
     });
   });
-
-})
+});

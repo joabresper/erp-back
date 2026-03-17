@@ -30,7 +30,10 @@ export class PermissionsService {
     });
   }
 
-  async update(id: string, updatePermissionDto: UpdatePermissionDto): Promise<Permission> {
+  async update(
+    id: string,
+    updatePermissionDto: UpdatePermissionDto,
+  ): Promise<Permission> {
     return await this.prismaService.permission.update({
       where: { id },
       data: updatePermissionDto,
@@ -43,4 +46,3 @@ export class PermissionsService {
     });
   }
 }
-

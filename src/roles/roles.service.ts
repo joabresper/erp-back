@@ -7,9 +7,7 @@ import { RoleWithPermissionsEntity } from './entities/role.entity';
 
 @Injectable()
 export class RolesService {
-  constructor(
-    private prismaService: PrismaService
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     return await this.prismaService.role.create({
@@ -25,9 +23,15 @@ export class RolesService {
     });
   }
 
-  async findByName(name: string, includePermissions: boolean): Promise<RoleWithPermissionsEntity>;
+  async findByName(
+    name: string,
+    includePermissions: boolean,
+  ): Promise<RoleWithPermissionsEntity>;
   async findByName(name: string): Promise<Role>;
-  async findByName(name: string, includePermissions: boolean = true): Promise<Role | RoleWithPermissionsEntity> {
+  async findByName(
+    name: string,
+    includePermissions: boolean = true,
+  ): Promise<Role | RoleWithPermissionsEntity> {
     return await this.prismaService.role.findUniqueOrThrow({
       where: { name },
       include: {
@@ -35,9 +39,15 @@ export class RolesService {
       },
     });
   }
-  async findById(id: string, includePermissions: boolean): Promise<RoleWithPermissionsEntity>;
+  async findById(
+    id: string,
+    includePermissions: boolean,
+  ): Promise<RoleWithPermissionsEntity>;
   async findById(id: string): Promise<Role>;
-  async findById(id: string, includePermissions: boolean = false): Promise<Role | RoleWithPermissionsEntity> {
+  async findById(
+    id: string,
+    includePermissions: boolean = false,
+  ): Promise<Role | RoleWithPermissionsEntity> {
     return await this.prismaService.role.findUniqueOrThrow({
       where: { id },
       include: {

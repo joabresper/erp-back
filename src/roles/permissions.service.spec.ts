@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionsService } from './permissions.service';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { DeepMockProxy, mockDeep } from 'jest-mock-extended'
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { PrismaService } from '../prisma/prisma.service';
 
 describe('PermissionsService', () => {
   let service: PermissionsService;
-  let prisma: DeepMockProxy<PrismaClient>
+  let prisma: DeepMockProxy<PrismaClient>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -15,12 +15,12 @@ describe('PermissionsService', () => {
         {
           provide: PrismaService,
           useValue: mockDeep<PrismaClient>(),
-        }
-      ]
+        },
+      ],
     }).compile();
 
     service = module.get<PermissionsService>(PermissionsService);
-    prisma = module.get(PrismaService)
+    prisma = module.get(PrismaService);
   });
 
   it('should be defined', () => {
@@ -31,9 +31,9 @@ describe('PermissionsService', () => {
     it('debería retornar un permiso si existe', async () => {
       // 1. PREPARAR (Arrange)
       const permissionName = 'users.create';
-      const mockPermission = { 
-        id: 'uuid-123', 
-        name: permissionName, 
+      const mockPermission = {
+        id: 'uuid-123',
+        name: permissionName,
         description: 'Permission to create users',
       };
 
@@ -45,7 +45,8 @@ describe('PermissionsService', () => {
 
       // 3. VERIFICAR (Assert)
       expect(result).toEqual(mockPermission); // Que devuelva el objeto correcto
-      expect(prisma.permission.findUniqueOrThrow).toHaveBeenCalledWith({ // Que haya llamado a Prisma con el where correcto
+      expect(prisma.permission.findUniqueOrThrow).toHaveBeenCalledWith({
+        // Que haya llamado a Prisma con el where correcto
         where: { name: permissionName },
       });
     });
@@ -53,21 +54,21 @@ describe('PermissionsService', () => {
     it('debería lanzar un error de Prisma si el permiso no existe', async () => {
       // 1. PREPARAR
       const permissionName = 'GHOST_PERMISSION';
-    
+
       // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
-    
+
       // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.permission.findUniqueOrThrow.mockRejectedValue(prismaError);
-    
+
       // 2. ACTUAR Y VERIFICAR
       // Esperamos que explote con el error nativo de Prisma
-      await expect(service.findByName(permissionName))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findByName(permissionName)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -75,8 +76,8 @@ describe('PermissionsService', () => {
     it('debería retornar un permiso si existe', async () => {
       // 1. PREPARAR (Arrange)
       const permissionId = 'uuid-123';
-      const mockPermission = { 
-        id: permissionId, 
+      const mockPermission = {
+        id: permissionId,
         name: 'users.create',
         description: 'Permission to create users',
       };
@@ -89,7 +90,8 @@ describe('PermissionsService', () => {
 
       // 3. VERIFICAR (Assert)
       expect(result).toEqual(mockPermission); // Que devuelva el objeto correcto
-      expect(prisma.permission.findUniqueOrThrow).toHaveBeenCalledWith({ // Que haya llamado a Prisma con el where correcto
+      expect(prisma.permission.findUniqueOrThrow).toHaveBeenCalledWith({
+        // Que haya llamado a Prisma con el where correcto
         where: { id: permissionId },
       });
     });
@@ -97,21 +99,21 @@ describe('PermissionsService', () => {
     it('debería lanzar un error de Prisma si el permiso no existe', async () => {
       // 1. PREPARAR
       const permissionId = 'uuid-no-existe';
-    
+
       // Creamos el error falso de Prisma P2025 (Record not found)
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
-    
+
       // IMPORTANTE: Usamos 'mockRejectedValue' porque OrThrow lanza un error, no retorna null
       prisma.permission.findUniqueOrThrow.mockRejectedValue(prismaError);
-    
+
       // 2. ACTUAR Y VERIFICAR
       // Esperamos que explote con el error nativo de Prisma
-      await expect(service.findById(permissionId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.findById(permissionId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -130,7 +132,7 @@ describe('PermissionsService', () => {
 
       const result = await service.create(dto);
       expect(result).toEqual(resultObj);
-      expect(prisma.permission.create).toHaveBeenCalledWith({data: dto})
+      expect(prisma.permission.create).toHaveBeenCalledWith({ data: dto });
     });
 
     it('deberia crear el permiso solo con name (sin description)', async () => {
@@ -147,21 +149,22 @@ describe('PermissionsService', () => {
 
       const result = await service.create(dto);
       expect(result).toEqual(resultObj);
-      expect(prisma.permission.create).toHaveBeenCalledWith({data: dto})
+      expect(prisma.permission.create).toHaveBeenCalledWith({ data: dto });
     });
 
     it('deberia fallar la creacion si ya existe ', async () => {
       // 1. Simulamos que PRISMA explota con el error P2002
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
-        code: 'P2002', clientVersion: '5.0' 
+        code: 'P2002',
+        clientVersion: '5.0',
       } as any);
-    
+
       prisma.permission.create.mockRejectedValue(error);
 
       // 2. Esperamos que el error de Prisma suba (el Filtro Global lo atrapará después)
-      await expect(service.create({ name: 'DUPLICADO' }))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.create({ name: 'DUPLICADO' })).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
     });
   });
 
@@ -171,18 +174,18 @@ describe('PermissionsService', () => {
         {
           id: 'uuid-1',
           name: 'users.create',
-          description: null
+          description: null,
         },
         {
           id: 'uuid-2',
           name: 'users.read',
-          description: null
+          description: null,
         },
         {
           id: 'uuid-3',
           name: 'users.update',
-          description: null
-        }
+          description: null,
+        },
       ];
 
       prisma.permission.findMany.mockResolvedValue(mockPermissions);
@@ -207,12 +210,12 @@ describe('PermissionsService', () => {
       const permissionId = 'uuid-123';
       const updatePermissionDto = {
         name: 'users.edit',
-        description: 'Nueva descripcion'
+        description: 'Nueva descripcion',
       };
       const updatedPermission = {
         id: permissionId,
         name: updatePermissionDto.name,
-        description: updatePermissionDto.description
+        description: updatePermissionDto.description,
       };
 
       prisma.permission.update.mockResolvedValue(updatedPermission);
@@ -229,12 +232,12 @@ describe('PermissionsService', () => {
     it('deberia actualizar solo algunos campos (actualizacion parcial)', async () => {
       const permissionId = 'uuid-123';
       const updatePermissionDto = {
-        description: 'Solo actualizo la descripcion'
+        description: 'Solo actualizo la descripcion',
       };
       const updatedPermission = {
         id: permissionId,
         name: 'users.create', // Se mantiene el nombre original
-        description: updatePermissionDto.description
+        description: updatePermissionDto.description,
       };
 
       prisma.permission.update.mockResolvedValue(updatedPermission);
@@ -252,17 +255,21 @@ describe('PermissionsService', () => {
       const permissionId = 'uuid-xxx';
       const updatePermissionDto = {
         name: 'Nuevo',
-        description: 'desc'
+        description: 'desc',
       };
 
-      const error = new Prisma.PrismaClientKnownRequestError('Permission not found', {
-        code: 'P2025', clientVersion: '5.0'
-      } as any);
+      const error = new Prisma.PrismaClientKnownRequestError(
+        'Permission not found',
+        {
+          code: 'P2025',
+          clientVersion: '5.0',
+        } as any,
+      );
       prisma.permission.update.mockRejectedValue(error);
 
-      await expect(service.update(permissionId, updatePermissionDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.update(permissionId, updatePermissionDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
       expect(prisma.permission.update).toHaveBeenCalledWith({
         where: { id: permissionId },
         data: updatePermissionDto,
@@ -276,13 +283,14 @@ describe('PermissionsService', () => {
       };
 
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
-        code: 'P2002', clientVersion: '5.0' 
+        code: 'P2002',
+        clientVersion: '5.0',
       } as any);
       prisma.permission.update.mockRejectedValue(error);
 
-      await expect(service.update(permissionId, updatePermissionDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(
+        service.update(permissionId, updatePermissionDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
       expect(prisma.permission.update).toHaveBeenCalledWith({
         where: { id: permissionId },
         data: updatePermissionDto,
@@ -296,7 +304,7 @@ describe('PermissionsService', () => {
       const deletedPermission = {
         id: permissionId,
         name: 'users.delete',
-        description: 'Permission to delete users'
+        description: 'Permission to delete users',
       };
 
       prisma.permission.delete.mockResolvedValue(deletedPermission);
@@ -311,15 +319,19 @@ describe('PermissionsService', () => {
 
     it('debería lanzar un error si el permiso no existe', async () => {
       const permissionId = 'uuid-no-existe';
-      const error = new Prisma.PrismaClientKnownRequestError('Permission not found', {
-        code: 'P2025', clientVersion: '5.0'
-      } as any);
+      const error = new Prisma.PrismaClientKnownRequestError(
+        'Permission not found',
+        {
+          code: 'P2025',
+          clientVersion: '5.0',
+        } as any,
+      );
 
       prisma.permission.delete.mockRejectedValue(error);
 
-      await expect(service.remove(permissionId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(permissionId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.permission.delete).toHaveBeenCalledWith({
         where: { id: permissionId },
       });
@@ -327,20 +339,22 @@ describe('PermissionsService', () => {
 
     it('debería lanzar un error si el permiso tiene relaciones (foreign key constraint)', async () => {
       const permissionId = 'uuid-con-relaciones';
-      const error = new Prisma.PrismaClientKnownRequestError('Foreign key constraint failed', {
-        code: 'P2003', clientVersion: '5.0'
-      } as any);
+      const error = new Prisma.PrismaClientKnownRequestError(
+        'Foreign key constraint failed',
+        {
+          code: 'P2003',
+          clientVersion: '5.0',
+        } as any,
+      );
 
       prisma.permission.delete.mockRejectedValue(error);
 
-      await expect(service.remove(permissionId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(service.remove(permissionId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(prisma.permission.delete).toHaveBeenCalledWith({
         where: { id: permissionId },
       });
     });
   });
-
-})
-
+});

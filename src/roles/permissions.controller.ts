@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -17,7 +15,10 @@ export class PermissionsController {
   @Get()
   @RequirePermissions('PERMISSION:VIEW')
   @ApiOperation({ summary: 'Get all permissions' })
-  @ApiResponse({ status: 200, description: 'List of permissions retrieved successfully.' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of permissions retrieved successfully.',
+  })
   findAll() {
     return this.permissionsService.findAll();
   }
@@ -25,19 +26,22 @@ export class PermissionsController {
   @Get(':id')
   @RequirePermissions('PERMISSION:VIEW')
   @ApiOperation({ summary: 'Get permission by ID' })
-  @ApiResponse({ status: 200, description: 'The permission has been successfully retrieved.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The permission has been successfully retrieved.',
+  })
   @ApiResponse({ status: 404, description: 'Permission not found.' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.permissionsService.findById(id);
   }
 
   // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+  // update(@Param('id', ParseUUIDPipe) id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
   //   return this.permissionsService.update(id, updatePermissionDto);
   // }
 
   // @Delete(':id')
-  // remove(@Param('id') id: string) {
+  // remove(@Param('id', ParseUUIDPipe) id: string) {
   //   return this.permissionsService.remove(id);
   // }
 }

@@ -14,7 +14,9 @@ describe('UsersController', () => {
   let service: DeepMockProxy<UsersService>;
 
   // Factories para fixtures
-  const createUserDtoFactory = (overrides?: Partial<CreateUserDto>): CreateUserDto => ({
+  const createUserDtoFactory = (
+    overrides?: Partial<CreateUserDto>,
+  ): CreateUserDto => ({
     email: 'test@example.com',
     fullName: 'John Doe',
     password: 'password123',
@@ -22,7 +24,9 @@ describe('UsersController', () => {
     ...overrides,
   });
 
-  const mockRoleFactory = (overrides?: Partial<{ id: string; name: string; description: string }>) => ({
+  const mockRoleFactory = (
+    overrides?: Partial<{ id: string; name: string; description: string }>,
+  ) => ({
     id: 'uuid-role-123',
     name: 'ADMIN',
     description: 'Admin role',
@@ -30,12 +34,13 @@ describe('UsersController', () => {
   });
 
   const mockUserFactory = (
-    overrides?: Partial<User & { role: ReturnType<typeof mockRoleFactory> }>
+    overrides?: Partial<User & { role: ReturnType<typeof mockRoleFactory> }>,
   ): User & { role: ReturnType<typeof mockRoleFactory> } => ({
     id: 'uuid-user-123',
     email: 'test@example.com',
     fullName: 'John Doe',
-    password: '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012',
+    password:
+      '$2b$10$hashedPassword1234567890123456789012345678901234567890123456789012',
     phone: null,
     address: null,
     roleId: 'uuid-role-123',
@@ -112,14 +117,14 @@ describe('UsersController', () => {
     it('debería lanzar un error si no existe el rol por defecto', async () => {
       const createUserDto = createUserDtoFactory({ roleId: undefined });
       const error = new InternalServerErrorException(
-        'The system is not configured correctly (Missing default role).'
+        'The system is not configured correctly (Missing default role).',
       );
 
       service.create.mockRejectedValue(error);
 
-      await expect(controller.create(createUserDto))
-        .rejects
-        .toThrow(InternalServerErrorException);
+      await expect(controller.create(createUserDto)).rejects.toThrow(
+        InternalServerErrorException,
+      );
       expect(service.create).toHaveBeenCalledWith(createUserDto);
     });
 
@@ -146,7 +151,9 @@ describe('UsersController', () => {
     });
 
     it('debería lanzar un error si el email ya existe (duplicado)', async () => {
-      const createUserDto = createUserDtoFactory({ email: 'duplicate@example.com' });
+      const createUserDto = createUserDtoFactory({
+        email: 'duplicate@example.com',
+      });
       const error = new Prisma.PrismaClientKnownRequestError('Duplicado', {
         code: 'P2002',
         clientVersion: '5.0',
@@ -154,9 +161,9 @@ describe('UsersController', () => {
 
       service.create.mockRejectedValue(error);
 
-      await expect(controller.create(createUserDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(controller.create(createUserDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(service.create).toHaveBeenCalledWith(createUserDto);
     });
   });
@@ -239,14 +246,14 @@ describe('UsersController', () => {
       const email = 'notfound@example.com';
       const error = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       service.findByEmail.mockRejectedValue(error);
 
-      await expect(controller.findAll(email))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(controller.findAll(email)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(service.findByEmail).toHaveBeenCalledWith(email);
     });
   });
@@ -281,17 +288,16 @@ describe('UsersController', () => {
       const userId = 'uuid-no-existe';
       const error = new Prisma.PrismaClientKnownRequestError(
         'No se encontró el registro',
-        { code: 'P2025', clientVersion: '5.0.0' } as any
+        { code: 'P2025', clientVersion: '5.0.0' } as any,
       );
 
       service.findById.mockRejectedValue(error);
 
-      await expect(controller.findOne(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(service.findById).toHaveBeenCalledWith(userId);
     });
-
   });
 
   describe('update', () => {
@@ -364,12 +370,11 @@ describe('UsersController', () => {
 
       service.update.mockRejectedValue(error);
 
-      await expect(controller.update(userId, updateUserDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(controller.update(userId, updateUserDto)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(service.update).toHaveBeenCalledWith(userId, updateUserDto);
     });
-
   });
 
   describe('changeRol', () => {
@@ -407,7 +412,10 @@ describe('UsersController', () => {
       expect(result).toEqual(updatedUser);
       expect(result.roleId).toBe('uuid-new-role');
       expect(result.role).toEqual(mockNewRole);
-      expect(service.changeRole).toHaveBeenCalledWith(userId, changeUserRoleDto);
+      expect(service.changeRole).toHaveBeenCalledWith(
+        userId,
+        changeUserRoleDto,
+      );
       expect(service.changeRole).toHaveBeenCalledTimes(1);
     });
 
@@ -424,10 +432,13 @@ describe('UsersController', () => {
 
       service.changeRole.mockRejectedValue(error);
 
-      await expect(controller.changeRol(userId, changeUserRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
-      expect(service.changeRole).toHaveBeenCalledWith(userId, changeUserRoleDto);
+      await expect(
+        controller.changeRol(userId, changeUserRoleDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
+      expect(service.changeRole).toHaveBeenCalledWith(
+        userId,
+        changeUserRoleDto,
+      );
     });
 
     it('debería lanzar un error si el rol no existe (foreign key constraint)', async () => {
@@ -441,17 +452,19 @@ describe('UsersController', () => {
         {
           code: 'P2003',
           clientVersion: '5.0',
-        } as any
+        } as any,
       );
 
       service.changeRole.mockRejectedValue(error);
 
-      await expect(controller.changeRol(userId, changeUserRoleDto))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
-      expect(service.changeRole).toHaveBeenCalledWith(userId, changeUserRoleDto);
+      await expect(
+        controller.changeRol(userId, changeUserRoleDto),
+      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
+      expect(service.changeRole).toHaveBeenCalledWith(
+        userId,
+        changeUserRoleDto,
+      );
     });
-
   });
 
   describe('remove', () => {
@@ -490,11 +503,10 @@ describe('UsersController', () => {
 
       service.remove.mockRejectedValue(error);
 
-      await expect(controller.remove(userId))
-        .rejects
-        .toThrow(Prisma.PrismaClientKnownRequestError);
+      await expect(controller.remove(userId)).rejects.toThrow(
+        Prisma.PrismaClientKnownRequestError,
+      );
       expect(service.remove).toHaveBeenCalledWith(userId);
     });
-
   });
 });
