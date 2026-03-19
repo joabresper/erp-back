@@ -23,6 +23,12 @@ const PERMISSIONS_LIST = [
 
   { name: 'PROFILE:VIEW', description: 'Permite ver el perfil propio' },
   { name: 'PROFILE:UPDATE', description: 'Permite actualizar el perfil propio' },
+
+  { name: 'PRODUCTS:CREATE', description: 'Permite crear nuevos productos' },
+  { name: 'PRODUCTS:VIEW', description: 'Permite ver la lista de productos' },
+  { name: 'PRODUCTS:UPDATE', description: 'Permite modificar productos existentes' },
+  { name: 'PRODUCTS:CHANGE_STATUS', description: 'Permite cambiar el estado activo/inactivo de un producto' },
+  { name: 'PRODUCTS:DELETE', description: 'Permite eliminar productos' },
 ];
 
 async function main() {
