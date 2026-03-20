@@ -10,7 +10,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HierarchyGuard } from './common/guards/hierarchy.guard';
 import { ProductsModule } from './products/products.module';
-import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
