@@ -84,6 +84,7 @@ enum ProductType {
 }
 
 enum UnitMeasure {
-  KG
+  KILOGRAM
+  LITER
   UNIT
 }

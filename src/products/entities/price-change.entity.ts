@@ -31,5 +31,6 @@ export class PriceChange {
 	@ApiProperty({
 		description: "ID of the product associated with this price change",
 		example: "123e4567-e89b-12d3-a456-426614174000",
-	})	productId: string;
+	})
+	productId: string;
 }

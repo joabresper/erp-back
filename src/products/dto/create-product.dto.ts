@@ -1,13 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { ProductType, UnitMeasure } from "@prisma/client";
 import { Type } from "class-transformer";
-import { IsBoolean, IsDecimal, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from "class-validator";
-import { ProductType } from "src/common/constants/product-type.constants";
-import { UnitMeasure } from "src/common/constants/unit-measure.constants";
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
 
 export class CreateProductDto {
 	@ApiProperty({ example: "Bread", description: "The name of the product" })
 	@IsString()
 	@IsNotEmpty({ message: "Name must not be empty" })
+	@MinLength(3, { message: "Name must be at least 3 characters long" })
 	name: string;
 
 	@ApiProperty({ example: "ABC-123", description: "The SKU of the product" })

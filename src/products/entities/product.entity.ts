@@ -1,8 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ProductType } from "src/common/constants/product-type.constants";
-import { UnitMeasure } from "src/common/constants/unit-measure.constants";
 import { PriceChange } from "./price-change.entity";
-import { Product as PrismaProduct } from "@prisma/client";
+import { Product as PrismaProduct, ProductType, UnitMeasure } from "@prisma/client";
 
 export class Product {
 	@ApiProperty({
@@ -46,7 +44,7 @@ export class Product {
 
 	@ApiProperty({
 		description: "Unit of measure for the product",
-		example: "KG",
+		example: "KILOGRAM",
 		enum: UnitMeasure,
 		enumName: "UnitMeasure",
 	})
