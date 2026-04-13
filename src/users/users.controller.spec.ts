@@ -140,7 +140,7 @@ describe('UsersController', () => {
 
       service.findAll.mockResolvedValue(mockUsers);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll('false');
 
       expect(result).toEqual(mockUsers);
       expect(service.findAll).toHaveBeenCalledTimes(1);
@@ -160,7 +160,7 @@ describe('UsersController', () => {
       const mockUsers: User[] = [];
       service.findAll.mockResolvedValue(mockUsers);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll('false');
 
       expect(result).toEqual(mockUsers);
       expect(service.findAll).toHaveBeenCalledTimes(1);

@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query, Req } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
+import type { RequestWithUser } from 'src/auth/entities/req.entity';
 
 @Controller('products')
 export class ProductsController {
@@ -47,8 +48,9 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'The product has been successfully updated.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 404, description: 'Product not found.' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto, @Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.productsService.update(id, userId, updateProductDto);
   }
 
   // Endpoint to change the active status of a product.

@@ -34,6 +34,10 @@ describe('ProductsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    priceChange: {
+      create: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -49,7 +53,7 @@ describe('ProductsService', () => {
 
     service = module.get<ProductsService>(ProductsService);
     prismaService = module.get<PrismaService>(PrismaService);
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should be defined', () => {
@@ -231,49 +235,83 @@ describe('ProductsService', () => {
 
   describe('update', () => {
     it('should update a product successfully', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         name: 'Updated Product',
         price: 150,
       };
 
-      mockPrismaService.product.update.mockResolvedValue(mockProduct);
+      mockPrismaService.product.findUniqueOrThrow.mockResolvedValue(mockProduct);
+      mockPrismaService.product.update.mockResolvedValue({
+        ...mockProduct,
+        ...updateProductDto,
+        price: new Prisma.Decimal('150'),
+      });
+      mockPrismaService.priceChange.create.mockResolvedValue({});
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback(mockPrismaService),
+      );
 
       const result = await service.update(
         '123e4567-e89b-12d3-a456-426614174000',
+        userId,
         updateProductDto,
       );
 
+      expect(mockPrismaService.product.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: '123e4567-e89b-12d3-a456-426614174000' },
+      });
       expect(mockPrismaService.product.update).toHaveBeenCalledWith({
         where: { id: '123e4567-e89b-12d3-a456-426614174000' },
         data: updateProductDto,
+      });
+      expect(mockPrismaService.priceChange.create).toHaveBeenCalledWith({
+        data: {
+          productId: '123e4567-e89b-12d3-a456-426614174000',
+          oldPrice: 100.5,
+          newPrice: 150,
+          userId,
+        },
       });
       expect(result).toEqual(expect.any(Product));
     });
 
     it('should validate SKU is not duplicated when updating', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         sku: 'SKU002',
       };
 
       const anotherProduct = { ...mockProduct, id: 'different-id' };
+      mockPrismaService.product.findUniqueOrThrow.mockResolvedValue(mockProduct);
       mockPrismaService.product.findUnique.mockResolvedValue(anotherProduct);
 
       await expect(
-        service.update('123e4567-e89b-12d3-a456-426614174000', updateProductDto),
+        service.update(
+          '123e4567-e89b-12d3-a456-426614174000',
+          userId,
+          updateProductDto,
+        ),
       ).rejects.toThrow(BadRequestException);
       expect(mockPrismaService.product.update).not.toHaveBeenCalled();
     });
 
     it('should allow updating SKU to the same value', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         sku: 'SKU001',
       };
 
+      mockPrismaService.product.findUniqueOrThrow.mockResolvedValue(mockProduct);
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.product.update.mockResolvedValue(mockProduct);
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback(mockPrismaService),
+      );
 
       const result = await service.update(
         '123e4567-e89b-12d3-a456-426614174000',
+        userId,
         updateProductDto,
       );
 
@@ -281,30 +319,77 @@ describe('ProductsService', () => {
     });
 
     it('should update without SKU uniqueness lookup when SKU is not provided', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         name: 'Updated Product',
       };
 
+      mockPrismaService.product.findUniqueOrThrow.mockResolvedValue(mockProduct);
       mockPrismaService.product.update.mockResolvedValue(mockProduct);
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback(mockPrismaService),
+      );
 
-      await service.update('123e4567-e89b-12d3-a456-426614174000', updateProductDto);
+      await service.update(
+        '123e4567-e89b-12d3-a456-426614174000',
+        userId,
+        updateProductDto,
+      );
 
       expect(mockPrismaService.product.findUnique).not.toHaveBeenCalled();
       expect(mockPrismaService.product.update).toHaveBeenCalledWith({
         where: { id: '123e4567-e89b-12d3-a456-426614174000' },
         data: updateProductDto,
       });
+      expect(mockPrismaService.priceChange.create).not.toHaveBeenCalled();
+    });
+
+    it('should not create price history when price does not change', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
+      const updateProductDto: UpdateProductDto = {
+        name: 'Updated Product',
+        price: 100.5,
+      };
+
+      mockPrismaService.product.findUniqueOrThrow.mockResolvedValue(mockProduct);
+      mockPrismaService.product.update.mockResolvedValue({
+        ...mockProduct,
+        ...updateProductDto,
+      });
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback(mockPrismaService),
+      );
+
+      const result = await service.update(
+        '123e4567-e89b-12d3-a456-426614174000',
+        userId,
+        updateProductDto,
+      );
+
+      expect(mockPrismaService.product.update).toHaveBeenCalledWith({
+        where: { id: '123e4567-e89b-12d3-a456-426614174000' },
+        data: updateProductDto,
+      });
+      expect(mockPrismaService.priceChange.create).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.any(Product));
     });
 
     it('should propagate prisma errors while updating', async () => {
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         name: 'Updated Product',
       };
 
-      mockPrismaService.product.update.mockRejectedValue(new Error('DB error'));
+      mockPrismaService.product.findUniqueOrThrow.mockRejectedValue(
+        new Error('DB error'),
+      );
 
       await expect(
-        service.update('123e4567-e89b-12d3-a456-426614174000', updateProductDto),
+        service.update(
+          '123e4567-e89b-12d3-a456-426614174000',
+          userId,
+          updateProductDto,
+        ),
       ).rejects.toThrow('DB error');
     });
   });

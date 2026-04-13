@@ -8,7 +8,6 @@ import { ProductType, UnitMeasure } from '@prisma/client';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
-  let service: ProductsService;
 
   const mockProduct = {
     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -45,8 +44,7 @@ describe('ProductsController', () => {
     }).compile();
 
     controller = module.get<ProductsController>(ProductsController);
-    service = module.get<ProductsService>(ProductsService);
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('should be defined', () => {
@@ -172,19 +170,22 @@ describe('ProductsController', () => {
   });
 
   describe('update', () => {
-    it('should call service.update with ID and DTO', async () => {
+    it('should call service.update with ID, user ID and DTO', async () => {
       const productId = '123e4567-e89b-12d3-a456-426614174000';
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         name: 'Updated Product',
         price: 100.4,
       };
+      const req = { user: { id: userId } } as any;
 
       mockProductsService.update.mockResolvedValue(mockProduct);
 
-      const result = await controller.update(productId, updateProductDto);
+      const result = await controller.update(productId, updateProductDto, req);
 
       expect(mockProductsService.update).toHaveBeenCalledWith(
         productId,
+        userId,
         updateProductDto,
       );
       expect(result).toEqual(mockProduct);
@@ -192,15 +193,17 @@ describe('ProductsController', () => {
 
     it('should propagate service errors on update', async () => {
       const productId = '123e4567-e89b-12d3-a456-426614174000';
+      const userId = '987e6543-e21b-12d3-a456-426614174999';
       const updateProductDto: UpdateProductDto = {
         name: 'Updated Product',
       };
+      const req = { user: { id: userId } } as any;
 
       mockProductsService.update.mockRejectedValue(new Error('Service error'));
 
-      await expect(controller.update(productId, updateProductDto)).rejects.toThrow(
-        'Service error',
-      );
+      await expect(
+        controller.update(productId, updateProductDto, req),
+      ).rejects.toThrow('Service error');
     });
   });
 

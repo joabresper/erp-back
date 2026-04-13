@@ -51,7 +51,7 @@ model Product {
   sku         String   @unique
   name        String
   description String?
-  price       Decimal
+  price       Decimal  @db.Decimal(10, 2)
   type        ProductType @default(GENERIC)
   unit        UnitMeasure @default(UNIT)
   isSalable   Boolean  @default(true)
@@ -64,8 +64,8 @@ model Product {
 
 model PriceChange {
   id        String   @id @default(uuid())
-  oldPrice  Float
-  newPrice  Float
+  oldPrice  Decimal  @db.Decimal(10, 2)
+  newPrice  Decimal  @db.Decimal(10, 2)
   date      DateTime @default(now())
 
   productId String
