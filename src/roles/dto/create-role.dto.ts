@@ -15,7 +15,7 @@ export class CreateRoleDto {
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'The description of the role',
@@ -34,5 +34,5 @@ export class CreateRoleDto {
   @IsOptional()
   @Min(1)
   @Max(100)
-  level: number;
+  level!: number;
 }

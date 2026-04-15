@@ -7,32 +7,32 @@ export class Product {
 		description: "ID of the product",
 		example: "123e4567-e89b-12d3-a456-426614174000",
 	})
-	id: string;
+	id!: string;
 
 	@ApiProperty({
 		description: "SKU of the product",
 		example: "ABC-123",
 	})
-	sku: string;
+	sku!: string;
 
 	@ApiProperty({
 		description: "Name of the product",
 		example: "Bread",
 	})
-	name: string;
+	name!: string;
 
 	@ApiProperty({
 		description: "Description of the product",
 		example: "Fresh bread made with natural ingredients",
 	})
-	description: string | null;
+	description!: string | null;
 
 	@ApiProperty({
 		description: "Price of the product",
 		example: 19.99,
 		type: Number,
 	})
-	price: number;
+	price!: number;
 
 	@ApiProperty({
 		description: "Type of the product",
@@ -40,7 +40,7 @@ export class Product {
 		enum: ProductType,
 		enumName: "ProductType",
 	})
-	type: ProductType;
+	type!: ProductType;
 
 	@ApiProperty({
 		description: "Unit of measure for the product",
@@ -48,21 +48,21 @@ export class Product {
 		enum: UnitMeasure,
 		enumName: "UnitMeasure",
 	})
-	unit: UnitMeasure;
+	unit!: UnitMeasure;
 
 	@ApiProperty({
 		description: "Indicates if the product is salable",
 		example: true,
 		default: true,
 	})
-	isSalable: boolean;
+	isSalable!: boolean;
 
 	@ApiProperty({
 		description: "Indicates if the product is active",
 		example: true,
 		default: true,
 	})
-	active: boolean;
+	active!: boolean;
 
 	@ApiProperty({
 		description: "Date when the product is created",
@@ -70,13 +70,13 @@ export class Product {
 		type: Date,
 
 	})
-	createdAt: Date;
+	createdAt!: Date;
 
 	@ApiProperty({
 		description: "Date when the product is last updated",
 		example: "2024-06-19T18:25:43.511Z",
 	})
-	updatedAt: Date;
+	updatedAt!: Date;
 
 	@ApiProperty({
 		description: "List of price changes for the product",

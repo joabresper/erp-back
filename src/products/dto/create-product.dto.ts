@@ -8,12 +8,12 @@ export class CreateProductDto {
 	@IsString()
 	@IsNotEmpty({ message: "Name must not be empty" })
 	@MinLength(3, { message: "Name must be at least 3 characters long" })
-	name: string;
+	name!: string;
 
 	@ApiProperty({ example: "ABC-123", description: "The SKU of the product" })
 	@IsString()
 	@IsNotEmpty({ message: "SKU must not be empty" })
-	sku: string;
+	sku!: string;
 
 	@ApiProperty({ example: "Fresh bread made with natural ingredients", description: "The description of the product", required: false })
 	@IsString()
@@ -24,7 +24,7 @@ export class CreateProductDto {
 	@Type(() => Number)
 	@IsNumber({ maxDecimalPlaces: 2 })
 	@IsPositive({ message: "Price must be greater than zero" })
-	price: number;
+	price!: number;
 
 	@ApiProperty({ example: "RESALE", description: "The type of the product", enum: ProductType, required: false })
 	@IsEnum(ProductType, { message: "Type must be a valid ProductType enum value" })

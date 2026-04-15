@@ -6,25 +6,25 @@ export class RoleEntity implements Role {
     description: 'The id of the role',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'The name of the role',
     example: 'admin',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'The description of the role',
     example: 'Admin role',
   })
-  description: string | null;
+  description!: string | null;
 
   @ApiProperty({
     description: 'The level of the role (higher means more permissions)',
     example: 1,
   })
-  level: number;
+  level!: number;
 }
 
 export class RoleWithPermissionsEntity extends RoleEntity {
@@ -32,5 +32,5 @@ export class RoleWithPermissionsEntity extends RoleEntity {
     description: 'The permissions associated with the role',
     isArray: true,
   })
-  permissions: Permission[];
+  permissions?: Permission[];
 }

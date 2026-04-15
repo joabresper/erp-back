@@ -10,5 +10,5 @@ export class UpdateRolePermissionsDto {
     each: true,
     message: 'Each permissionId must be a valid UUID',
   })
-  permissionIds: string[];
+  permissionIds!: string[];
 }

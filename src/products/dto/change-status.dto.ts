@@ -7,5 +7,5 @@ export class ChangeStatusDto {
 	example: true,
   })
   @IsBoolean({ message: "Active status must be a boolean value" })
-  active: boolean;
+  active!: boolean;
 }

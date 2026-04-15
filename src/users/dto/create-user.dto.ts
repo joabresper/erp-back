@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -15,7 +14,7 @@ export class CreateUserDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'The full name of the user (max 100 characters)',
@@ -24,7 +23,7 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(100)
   @IsNotEmpty()
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty({
     description: 'The password of the user',
@@ -32,7 +31,7 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 
   @ApiProperty({
     description: 'The phone of the user (max 20 characters)',

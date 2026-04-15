@@ -8,7 +8,7 @@ export class CreatePermissionDto {
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'The description of the permission',
