@@ -32,5 +32,5 @@ export class RoleWithPermissionsEntity extends RoleEntity {
     description: 'The permissions associated with the role',
     isArray: true,
   })
-  permissions?: Permission[];
+  permissions!: Permission[];
 }

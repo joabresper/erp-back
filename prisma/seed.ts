@@ -29,6 +29,13 @@ const PERMISSIONS_LIST = [
   { name: 'PRODUCTS:UPDATE', description: 'Permite modificar productos existentes' },
   { name: 'PRODUCTS:CHANGE_STATUS', description: 'Permite cambiar el estado activo/inactivo de un producto' },
   { name: 'PRODUCTS:DELETE', description: 'Permite eliminar productos' },
+
+  { name: 'CUSTOMER:CREATE', description: 'Permite crear nuevos clientes' },
+  { name: 'CUSTOMER:VIEW', description: 'Permite ver la lista de clientes' },
+  { name: 'CUSTOMER:VIEW_DELETED', description: 'Permite ver clientes eliminados' },
+  { name: 'CUSTOMER:UPDATE', description: 'Permite modificar clientes existentes' },
+  { name: 'CUSTOMER:DELETE', description: 'Permite eliminar clientes' },
+  { name: 'CUSTOMER:RESTORE', description: 'Permite restaurar clientes eliminados' }
 ];
 
 async function main() {

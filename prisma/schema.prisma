@@ -75,6 +75,21 @@ model PriceChange {
   user      User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 }
 
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  postalCode String?
+  taxId     String?  @unique
+  taxCondition String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ENUMS
 enum ProductType {
   RAW_MATERIAL

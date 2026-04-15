@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HierarchyGuard } from './common/guards/hierarchy.guard';
 import { ProductsModule } from './products/products.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProductsModule } from './products/products.module';
     RolesModule,
     AuthModule,
     ProductsModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [
