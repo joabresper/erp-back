@@ -32,7 +32,7 @@ export class ProductsService {
     return products.map((product) => new Product(product));
   }
 
-  async findOne(id: string, includeHistory: boolean): Promise<Product> {
+  async findOne(id: string, includeHistory: boolean = false): Promise<Product> {
     const product = await this.prismaService.product.findUniqueOrThrow({
       where: { id },
       include: { priceChanges: includeHistory }

@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { PriceChange } from "./price-change.entity";
 import { Product as PrismaProduct, ProductType, UnitMeasure } from "@prisma/client";
-
+// TODO: Eliminar la documentacion de swagger de esta clase y usarla solo en el DTO, para no mezclar responsabilidades. Dejar esta clase solo como una entidad de negocio, sin detalles de presentación.
+// TODO: Crear enums para ProductType y UnitMeasure, y usarlos tanto en el DTO como en la entidad, para evitar acoplamiento con el ORM.
 export class Product {
 	@ApiProperty({
 		description: "ID of the product",

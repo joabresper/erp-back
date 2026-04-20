@@ -11,6 +11,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HierarchyGuard } from './common/guards/hierarchy.guard';
 import { ProductsModule } from './products/products.module';
 import { CustomersModule } from './customers/customers.module';
+import { SalesModule } from './sales/sales.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CustomersModule } from './customers/customers.module';
     AuthModule,
     ProductsModule,
     CustomersModule,
+    SalesModule,
   ],
   controllers: [AppController],
   providers: [

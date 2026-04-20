@@ -47,6 +47,14 @@ export class CustomersService {
     });
   }
 
+  async findDefault(): Promise<Customer> {
+    return await this.prismaService.customer.findFirstOrThrow({
+      where: {
+        taxId: '00000000000',
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Customer | null> {
     return await this.prismaService.customer.findUniqueOrThrow({
       where: {

@@ -26,6 +26,7 @@ model User {
   roleId    String
 
   priceChanges PriceChange[]
+  sales Sale[]
 }
 
 model Role {
@@ -60,6 +61,7 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   priceChanges PriceChange[]
+  saleItems SaleItem[]
 }
 
 model PriceChange {
@@ -88,6 +90,54 @@ model Customer {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  sales Sale[]
+}
+
+model SaleItem {
+  id            String   @id @default(uuid())
+  productName   String
+  productSku    String
+  quantity      Decimal  @db.Decimal(5, 2)
+  unitPrice     Decimal  @db.Decimal(10, 2) // Precio unitario al momento de la venta
+  discountAmount Decimal  @db.Decimal(10, 2)
+  subtotalAmount Decimal  @db.Decimal(10, 2)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  saleId String
+  sale   Sale @relation(fields: [saleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Sale {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now())
+  totalAmount     Decimal  @db.Decimal(10, 2)
+  totalDiscountAmount  Decimal  @db.Decimal(10, 2)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod @default(CASH)
+  invoiceNumber   String?
+  invoiceDate     DateTime
+  invoiceType     InvoiceType @default(TICKET)
+
+  items SaleItem[]
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  createdById String
+  createdBy   User @relation(fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+}
+
+model InvoiceSequence {
+  id          String        @id @default(uuid())
+  type        InvoiceType   @unique
+  prefix      Int           @default(1) //Punto de venta
+  lastNumber  Int           @default(0)
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([type, prefix])
 }
 
 // ENUMS
@@ -102,4 +152,28 @@ enum UnitMeasure {
   KILOGRAM
   LITER
   UNIT
+}
+
+enum PaymentStatus {
+  PENDING        // Pendiente de pago
+  PARTIALLY_PAID // Pago parcial (señas)
+  PAID           // Totalmente pagado
+  CANCELLED      // Venta anulada (no se cobra)
+  REFUNDED       // Devuelta (se cobró y se devolvió la plata)
+}
+
+enum InvoiceType {
+  A
+  B
+  C
+  TICKET
+  CREDIT_NOTE
+}
+
+enum PaymentMethod {
+  CASH            // Efectivo
+  DEBIT_CARD      // Débito
+  CREDIT_CARD     // Crédito
+  TRANSFER        // Transferencia bancaria
+  ACCOUNT_CREDIT  // "Cuenta Corriente" (fiado)
 }

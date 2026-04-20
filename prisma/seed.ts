@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { InvoiceType } from '@prisma/client';
 
 const prisma = new PrismaService();
 
@@ -35,7 +36,11 @@ const PERMISSIONS_LIST = [
   { name: 'CUSTOMER:VIEW_DELETED', description: 'Permite ver clientes eliminados' },
   { name: 'CUSTOMER:UPDATE', description: 'Permite modificar clientes existentes' },
   { name: 'CUSTOMER:DELETE', description: 'Permite eliminar clientes' },
-  { name: 'CUSTOMER:RESTORE', description: 'Permite restaurar clientes eliminados' }
+  { name: 'CUSTOMER:RESTORE', description: 'Permite restaurar clientes eliminados' },
+
+  { name: 'SALES:CREATE', description: 'Permite crear nuevas ventas' },
+  { name: 'SALES:VIEW', description: 'Permite ver la lista de ventas' },
+  { name: 'SALES:UPDATE', description: 'Permite modificar ventas existentes' },
 ];
 
 async function main() {
@@ -100,9 +105,40 @@ async function main() {
       roleId: adminRole.id, // Lo vinculamos al rol ADMIN que acabamos de crear
     },
   });
-
   console.log(`✅ Usuario Admin creado/asegurado: ${adminUser.email}`);
-}
+
+  console.log('Creando secuencia de facturación para cada tipo de comprobante...');
+  const invoiceTypes = Object.values(InvoiceType)
+  for (const type of invoiceTypes) {
+    await prisma.invoiceSequence.upsert({
+      where: {
+        type_prefix: {
+          type: type,
+          prefix: 1, // Punto de Venta por defecto
+        },
+      },
+      update: {},
+      create: {
+        type: type,
+        prefix: 1,
+        lastNumber: 0,
+      },
+    });
+  }
+  console.log(`✅ Se procesaron ${invoiceTypes.length} secuencias de facturación.`);
+
+  // Creacion de cliente por defecto
+  const defaultCustomer = await prisma.customer.upsert({
+    where: { taxId: '00000000000' },
+    update: {},
+    create: {
+      name: 'Consumidor Final',
+      taxId: '00000000000',
+      taxCondition: 'CONSUMIDOR FINAL',
+    },
+  });
+  console.log(`✅ Cliente por defecto creado/asegurado: ${defaultCustomer.name}`);
+};
 
 // Boilerplate estándar de Prisma para manejar la desconexión
 main()

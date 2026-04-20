@@ -21,7 +21,7 @@ export class AuthController {
   }
 
   @Get('profile')
-  @RequirePermissions('PROFILE:VIEW')
+  // @RequirePermissions('PROFILE:VIEW')
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({
     status: 200,

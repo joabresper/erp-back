@@ -61,6 +61,21 @@ export class CustomersController {
     return this.customersService.findOne(id);
   }
 
+  @Get('default')
+  @RequirePermissions('CUSTOMER:VIEW')
+  @ApiOperation({ summary: 'Get the default customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Default customer retrieved successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Default customer not found.',
+  })
+  findDefault() {
+    return this.customersService.findDefault();
+  }
+
   @Patch(':id')
   @RequirePermissions('CUSTOMER:UPDATE')
   @ApiOperation({ summary: 'Update a customer' })
