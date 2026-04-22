@@ -129,7 +129,7 @@ describe('ProductsService', () => {
   });
 
   describe('findAll', () => {
-    it('should return an array of products without history', async () => {
+    it('should return products filtered by isSalable=false', async () => {
       const products = [mockProduct];
       mockPrismaService.product.findMany.mockResolvedValue(products);
 
@@ -137,11 +137,12 @@ describe('ProductsService', () => {
 
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith({
         include: { priceChanges: false },
+        where: { isSalable: false },
       });
       expect(result).toEqual(expect.arrayContaining([expect.any(Product)]));
     });
 
-    it('should return an array of products with history', async () => {
+    it('should return products including price history when requested', async () => {
       const productsWithHistory = [
         {
           ...mockProduct,
@@ -150,10 +151,11 @@ describe('ProductsService', () => {
       ];
       mockPrismaService.product.findMany.mockResolvedValue(productsWithHistory);
 
-      const result = await service.findAll(true);
+      const result = await service.findAll(undefined, undefined, true);
 
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith({
         include: { priceChanges: true },
+        where: {},
       });
       expect(result).toEqual(expect.arrayContaining([expect.any(Product)]));
     });

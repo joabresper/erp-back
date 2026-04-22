@@ -97,7 +97,11 @@ describe('ProductsController', () => {
 
       const result = await controller.findAll('false');
 
-      expect(mockProductsService.findAll).toHaveBeenCalledWith(false);
+      expect(mockProductsService.findAll).toHaveBeenCalledWith(
+        false,
+        undefined,
+        undefined,
+      );
       expect(result).toEqual(products);
     });
 
@@ -107,7 +111,11 @@ describe('ProductsController', () => {
 
       const result = await controller.findAll('true');
 
-      expect(mockProductsService.findAll).toHaveBeenCalledWith(true);
+      expect(mockProductsService.findAll).toHaveBeenCalledWith(
+        true,
+        undefined,
+        undefined,
+      );
       expect(result).toEqual(products);
     });
 
@@ -117,7 +125,11 @@ describe('ProductsController', () => {
 
       const result = await controller.findAll(undefined);
 
-      expect(mockProductsService.findAll).toHaveBeenCalledWith(false);
+      expect(mockProductsService.findAll).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        undefined,
+      );
       expect(result).toEqual(products);
     });
 
@@ -155,7 +167,7 @@ describe('ProductsController', () => {
 
       const result = await controller.findOne(productId, undefined);
 
-      expect(mockProductsService.findOne).toHaveBeenCalledWith(productId, false);
+      expect(mockProductsService.findOne).toHaveBeenCalledWith(productId, undefined);
       expect(result).toEqual(mockProduct);
     });
 

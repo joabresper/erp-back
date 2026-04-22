@@ -522,6 +522,12 @@ describe('SalesService', () => {
               product: false,
             },
           },
+          customer: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       });
       expect(result).toEqual(expect.arrayContaining([expect.any(Sale)]));
@@ -537,6 +543,12 @@ describe('SalesService', () => {
           items: {
             include: {
               product: true,
+            },
+          },
+          customer: {
+            select: {
+              name: true,
+              email: true,
             },
           },
         },
@@ -564,6 +576,12 @@ describe('SalesService', () => {
               product: false,
             },
           },
+          customer: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       });
       expect(result).toEqual(expect.any(Sale));
@@ -580,6 +598,12 @@ describe('SalesService', () => {
           items: {
             include: {
               product: true,
+            },
+          },
+          customer: {
+            select: {
+              name: true,
+              email: true,
             },
           },
         },

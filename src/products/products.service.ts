@@ -24,9 +24,13 @@ export class ProductsService {
     return new Product(newProduct);
   }
 
-  async findAll(includeHistory: boolean): Promise<Product[]> {
+  async findAll(isSalable?: boolean, active?: boolean, includeHistory: boolean = false): Promise<Product[]> {
     const products = await this.prismaService.product.findMany({
-      include: { priceChanges: includeHistory }
+      include: { priceChanges: includeHistory },
+      where: {
+        ...(isSalable !== undefined && { isSalable }),
+        ...(active !== undefined && { active })
+      }
     });
 
     return products.map((product) => new Product(product));

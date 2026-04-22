@@ -45,6 +45,21 @@ export class CustomersController {
   findDeleted() {
     return this.customersService.findDeleted();
   }
+  
+  @Get('default')
+  @RequirePermissions('CUSTOMER:VIEW')
+  @ApiOperation({ summary: 'Get the default customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Default customer retrieved successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Default customer not found.',
+  })
+  findDefault() {
+    return this.customersService.findDefault();
+  }
 
   @Get(':id')
   @RequirePermissions('CUSTOMER:VIEW')
@@ -59,21 +74,6 @@ export class CustomersController {
   })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.customersService.findOne(id);
-  }
-
-  @Get('default')
-  @RequirePermissions('CUSTOMER:VIEW')
-  @ApiOperation({ summary: 'Get the default customer' })
-  @ApiResponse({
-    status: 200,
-    description: 'Default customer retrieved successfully.',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Default customer not found.',
-  })
-  findDefault() {
-    return this.customersService.findDefault();
   }
 
   @Patch(':id')

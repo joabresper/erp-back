@@ -24,9 +24,15 @@ export class ProductsController {
   @RequirePermissions('PRODUCTS:VIEW')
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'List of products retrieved successfully.' })
-  findAll(@Query('includeHistory') includeHistory?: string) {
-    const includeHistoryFlag = includeHistory === 'true';
-    return this.productsService.findAll(includeHistoryFlag);
+  findAll(
+    @Query('isSalable') isSalable?: string,
+    @Query('active') active?: string,
+    @Query('includeHistory') includeHistory?: string
+  ) {
+    const isSalableFlag = isSalable !== undefined ? isSalable === 'true' : undefined;
+    const activeFlag = active !== undefined ? active === 'true' : undefined;
+    const includeHistoryFlag = includeHistory !== undefined ? includeHistory === 'true' : undefined;
+    return this.productsService.findAll(isSalableFlag, activeFlag, includeHistoryFlag);
   }
 
   @Get(':id')
@@ -38,7 +44,7 @@ export class ProductsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('includeHistory') includeHistory?: string
   ) {
-    const includeHistoryFlag = includeHistory === 'true';
+    const includeHistoryFlag = includeHistory !== undefined ? includeHistory === 'true' : undefined;
     return this.productsService.findOne(id, includeHistoryFlag);
   }
 
