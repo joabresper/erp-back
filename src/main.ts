@@ -6,7 +6,14 @@ import { DtoValidationPipe } from './common/pipes/dto-validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'https://tu-frontend.onrender.com', // render
+      'http://localhost:5173'             // local
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('ERP API')
