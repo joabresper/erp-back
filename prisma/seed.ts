@@ -89,23 +89,22 @@ async function main() {
 
   // 3. Hashear la contraseña segura
   // IMPORTANTE: En producción, usá una variable de entorno o una password compleja
-  const password = await bcrypt.hash('admin', 10);
+  const password = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin', 10);
 
   // 4. Crear el Usuario Admin
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@admin.com' },
+    where: { email: process.env.ADMIN_EMAIL || 'admin@admin.com' },
     update: {
-      // Opcional: Si querés que el seed resetee la password del admin cada vez que corre, descomentá esto:
-      // password: password 
+      password: password 
     },
     create: {
-      email: 'admin@admin.com',
+      email: process.env.ADMIN_EMAIL || 'admin@admin.com',
       fullName: 'Admin',
       password: password,
       roleId: adminRole.id, // Lo vinculamos al rol ADMIN que acabamos de crear
     },
   });
-  console.log(`✅ Usuario Admin creado/asegurado: ${adminUser.email}`);
+  console.log(`✅ Usuario Admin creado/asegurado`);
 
   console.log('Creando secuencia de facturación para cada tipo de comprobante...');
   const invoiceTypes = Object.values(InvoiceType)
