@@ -67,7 +67,11 @@ export class UsersService {
         email,
         deletedAt: null
       },
-      include: { role: true }
+      include: { 
+        role: {
+          include: { permissions: true }
+        }
+      },
     })
   }
 
