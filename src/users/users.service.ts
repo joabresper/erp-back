@@ -99,8 +99,12 @@ export class UsersService {
         email,
         deletedAt: null,
       },
-      include: { role: true },
-    });
+      include: { 
+        role: {
+          include: { permissions: true }
+        }
+      },
+    })
   }
 
   // TODO: la modificacion del email se realiza en otro metodo con toras verificaciones
