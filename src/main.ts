@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: [
-      'https://tu-frontend.onrender.com', // render
+      'https://erp-front-1cet.onrender.com', // render
       'http://localhost:5173'             // local
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
