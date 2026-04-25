@@ -7,13 +7,14 @@ import { RequirePermissions } from 'src/common/decorators/require-permissions.de
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CheckHierarchy } from 'src/common/decorators/check-hierarchy.decorator';
 import { type RequestWithUser } from 'src/auth/entities/req.entity';
+import { PERMISSIONS } from 'src/common/constants/permissions.constant';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @RequirePermissions('USER:CREATE')
+  @RequirePermissions(PERMISSIONS.USER_CREATE)
   @CheckHierarchy('user')
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({
@@ -33,7 +34,7 @@ export class UsersController {
   }
 
   @Get()
-  @RequirePermissions('USER:VIEW')
+  @RequirePermissions(PERMISSIONS.USER_VIEW)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({
     status: 200,
@@ -45,7 +46,7 @@ export class UsersController {
   }
 
   @Get('deleted')
-  @RequirePermissions('USER:VIEW_DELETED')
+  @RequirePermissions(PERMISSIONS.USER_VIEW_DELETED)
   @ApiOperation({ summary: 'Get all deleted users' })
   @ApiResponse({
     status: 200,
@@ -56,7 +57,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @RequirePermissions('USER:VIEW')
+  @RequirePermissions(PERMISSIONS.USER_VIEW)
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({
     status: 200,
@@ -68,7 +69,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @RequirePermissions('USER:UPDATE')
+  @RequirePermissions(PERMISSIONS.USER_UPDATE)
   @CheckHierarchy('user')
   @ApiOperation({ summary: 'Update user information' })
   @ApiResponse({
@@ -84,7 +85,7 @@ export class UsersController {
   }
 
   @Patch(':id/role')
-  @RequirePermissions('USER:UPDATE_ROLE')
+  @RequirePermissions(PERMISSIONS.USER_UPDATE_ROLE)
   @CheckHierarchy('user')
   @ApiOperation({ summary: 'Change user role' })
   @ApiResponse({
@@ -105,7 +106,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @RequirePermissions('USER:DELETE')
+  @RequirePermissions(PERMISSIONS.USER_DELETE)
   @CheckHierarchy('user')
   @ApiOperation({ summary: 'Delete a user' })
   @ApiResponse({
@@ -118,7 +119,7 @@ export class UsersController {
   }
 
   @Patch(':id/restore')
-  @RequirePermissions('USER:RESTORE')
+  @RequirePermissions(PERMISSIONS.USER_RESTORE)
   @ApiOperation({ summary: 'Restore a deleted user' })
   @ApiResponse({
     status: 200,

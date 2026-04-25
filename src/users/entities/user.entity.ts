@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { RoleWithPermissionsEntity } from 'src/roles/entities/role.entity';
 
 export class User {
   @ApiProperty({
@@ -58,7 +59,11 @@ export class UserWithRole extends User {
   role!: Role;
 }
 
+export class UserWithRoleAndPermissions extends User {
+  role!: RoleWithPermissionsEntity;
+}
+
 export interface UserWithoutPasswordWithRole extends Omit<
-  UserWithRole,
+  UserWithRoleAndPermissions,
   'password'
 > {}

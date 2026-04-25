@@ -2,6 +2,7 @@ import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { PERMISSIONS } from 'src/common/constants/permissions.constant';
 
 @Controller('permissions')
 export class PermissionsController {
@@ -13,7 +14,7 @@ export class PermissionsController {
   // }
 
   @Get()
-  @RequirePermissions('PERMISSION:VIEW')
+  @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   @ApiOperation({ summary: 'Get all permissions' })
   @ApiResponse({
     status: 200,
@@ -24,7 +25,7 @@ export class PermissionsController {
   }
 
   @Get(':id')
-  @RequirePermissions('PERMISSION:VIEW')
+  @RequirePermissions(PERMISSIONS.PERMISSION_VIEW)
   @ApiOperation({ summary: 'Get permission by ID' })
   @ApiResponse({
     status: 200,

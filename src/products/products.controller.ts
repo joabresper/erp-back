@@ -6,13 +6,14 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ChangeStatusDto } from './dto/change-status.dto';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
 import type { RequestWithUser } from 'src/auth/entities/req.entity';
+import { PERMISSIONS } from 'src/common/constants/permissions.constant';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @RequirePermissions('PRODUCTS:CREATE')
+  @RequirePermissions(PERMISSIONS.PRODUCT_CREATE)
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: 201, description: 'The product has been successfully created.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
@@ -21,7 +22,7 @@ export class ProductsController {
   }
 
   @Get()
-  @RequirePermissions('PRODUCTS:VIEW')
+  @RequirePermissions(PERMISSIONS.PRODUCT_VIEW)
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'List of products retrieved successfully.' })
   findAll(
@@ -36,7 +37,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @RequirePermissions('PRODUCTS:VIEW')
+  @RequirePermissions(PERMISSIONS.PRODUCT_VIEW)
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiResponse({ status: 200, description: 'The product has been successfully retrieved.' })
   @ApiResponse({ status: 404, description: 'Product not found.' })
@@ -49,7 +50,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  @RequirePermissions('PRODUCTS:UPDATE')
+  @RequirePermissions(PERMISSIONS.PRODUCT_UPDATE)
   @ApiOperation({ summary: 'Update product information' })
   @ApiResponse({ status: 200, description: 'The product has been successfully updated.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
@@ -61,7 +62,7 @@ export class ProductsController {
 
   // Endpoint to change the active status of a product.
   @Patch(':id/status')
-  @RequirePermissions('PRODUCTS:CHANGE_STATUS')
+  @RequirePermissions(PERMISSIONS.PRODUCT_CHANGE_STATUS)
   @ApiOperation({ summary: 'Change the active status of a product' })
   @ApiResponse({ status: 200, description: 'The product status has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Product not found.' })
@@ -70,7 +71,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @RequirePermissions('PRODUCTS:DELETE')
+  @RequirePermissions(PERMISSIONS.PRODUCT_DELETE)
   @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 204, description: 'The product has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Product not found.' })

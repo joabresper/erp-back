@@ -158,7 +158,7 @@ enum PaymentStatus {
   PENDING        // Pendiente de pago
   PARTIALLY_PAID // Pago parcial (señas)
   PAID           // Totalmente pagado
-  CANCELLED      // Venta anulada (no se cobra)
+  CANCELED      // Venta anulada (no se cobra)
   REFUNDED       // Devuelta (se cobró y se devolvió la plata)
 }
 

@@ -12,7 +12,7 @@ import { User } from '@prisma/client';
 import { ChangeUserRoleDto } from './dto/change-user-rol.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HashingService } from 'src/common/providers/hashing.service';
-import { UserWithRole } from './entities/user.entity';
+import { UserWithRole, UserWithRoleAndPermissions } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -84,12 +84,16 @@ export class UsersService {
     });
   }
 
-  async findByIdWithRole(id: string): Promise<UserWithRole> {
+  async findByIdWithRole(id: string): Promise<UserWithRoleAndPermissions> {
     return await this.prismaService.user.findFirstOrThrow({
       where: {
         id,
       },
-      include: { role: true },
+      include: { 
+        role: {
+          include: { permissions: true }
+        }
+      },
     });
   }
 
@@ -100,11 +104,9 @@ export class UsersService {
         deletedAt: null,
       },
       include: { 
-        role: {
-          include: { permissions: true }
-        }
+        role: true
       },
-    })
+    });
   }
 
   // TODO: la modificacion del email se realiza en otro metodo con toras verificaciones

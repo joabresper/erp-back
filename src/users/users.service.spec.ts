@@ -281,7 +281,11 @@ describe('UsersService', () => {
         where: {
           id: userId,
         },
-        include: { role: true },
+        include: {
+          role: {
+            include: { permissions: true },
+          }
+        },
       });
     });
   });

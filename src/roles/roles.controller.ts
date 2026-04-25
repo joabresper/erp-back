@@ -15,13 +15,14 @@ import { UpdateRoleDto, UpdateRolePermissionsDto } from './dto/update-role.dto';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CheckHierarchy } from 'src/common/decorators/check-hierarchy.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions.constant';
 
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
-  @RequirePermissions('ROLE:CREATE')
+  @RequirePermissions(PERMISSIONS.ROLE_CREATE)
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Create a new role' })
   @ApiResponse({
@@ -38,7 +39,7 @@ export class RolesController {
   }
 
   @Get()
-  @RequirePermissions('ROLE:VIEW')
+  @RequirePermissions(PERMISSIONS.ROLE_VIEW)
   @ApiOperation({ summary: 'Get all roles' })
   @ApiResponse({
     status: 200,
@@ -50,7 +51,7 @@ export class RolesController {
   }
 
   @Get(':id')
-  @RequirePermissions('ROLE:VIEW')
+  @RequirePermissions(PERMISSIONS.ROLE_VIEW)
   @ApiOperation({ summary: 'Get role by ID' })
   @ApiResponse({
     status: 200,
@@ -66,7 +67,7 @@ export class RolesController {
   }
 
   @Patch(':id')
-  @RequirePermissions('ROLE:UPDATE')
+  @RequirePermissions(PERMISSIONS.ROLE_UPDATE)
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Update role information' })
   @ApiResponse({
@@ -87,7 +88,7 @@ export class RolesController {
   }
 
   @Delete(':id')
-  @RequirePermissions('ROLE:DELETE')
+  @RequirePermissions(PERMISSIONS.ROLE_DELETE)
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Delete a role' })
   @ApiResponse({
@@ -104,7 +105,7 @@ export class RolesController {
   }
 
   @Patch(':id/permissions')
-  @RequirePermissions('ROLE:UPDATE_PERMISSIONS')
+  @RequirePermissions(PERMISSIONS.ROLE_UPDATE_PERMISSIONS)
   @CheckHierarchy('role')
   @ApiOperation({ summary: 'Update role permissions' })
   @ApiResponse({

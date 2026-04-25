@@ -25,11 +25,11 @@ const PERMISSIONS_LIST = [
   { name: 'PROFILE:VIEW', description: 'Permite ver el perfil propio' },
   { name: 'PROFILE:UPDATE', description: 'Permite actualizar el perfil propio' },
 
-  { name: 'PRODUCTS:CREATE', description: 'Permite crear nuevos productos' },
-  { name: 'PRODUCTS:VIEW', description: 'Permite ver la lista de productos' },
-  { name: 'PRODUCTS:UPDATE', description: 'Permite modificar productos existentes' },
-  { name: 'PRODUCTS:CHANGE_STATUS', description: 'Permite cambiar el estado activo/inactivo de un producto' },
-  { name: 'PRODUCTS:DELETE', description: 'Permite eliminar productos' },
+  { name: 'PRODUCT:CREATE', description: 'Permite crear nuevos productos' },
+  { name: 'PRODUCT:VIEW', description: 'Permite ver la lista de productos' },
+  { name: 'PRODUCT:UPDATE', description: 'Permite modificar productos existentes' },
+  { name: 'PRODUCT:CHANGE_STATUS', description: 'Permite cambiar el estado activo/inactivo de un producto' },
+  { name: 'PRODUCT:DELETE', description: 'Permite eliminar productos' },
 
   { name: 'CUSTOMER:CREATE', description: 'Permite crear nuevos clientes' },
   { name: 'CUSTOMER:VIEW', description: 'Permite ver la lista de clientes' },
@@ -38,9 +38,9 @@ const PERMISSIONS_LIST = [
   { name: 'CUSTOMER:DELETE', description: 'Permite eliminar clientes' },
   { name: 'CUSTOMER:RESTORE', description: 'Permite restaurar clientes eliminados' },
 
-  { name: 'SALES:CREATE', description: 'Permite crear nuevas ventas' },
-  { name: 'SALES:VIEW', description: 'Permite ver la lista de ventas' },
-  { name: 'SALES:UPDATE', description: 'Permite modificar ventas existentes' },
+  { name: 'SALE:CREATE', description: 'Permite crear nuevas ventas' },
+  { name: 'SALE:VIEW', description: 'Permite ver la lista de ventas' },
+  { name: 'SALE:UPDATE', description: 'Permite modificar ventas existentes' },
 ];
 
 async function main() {

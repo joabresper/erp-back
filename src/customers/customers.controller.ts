@@ -4,13 +4,14 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RequirePermissions } from 'src/common/decorators/require-permissions.decorator';
+import { PERMISSIONS } from 'src/common/constants/permissions.constant';
 
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
-  @RequirePermissions('CUSTOMER:CREATE')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_CREATE)
   @ApiOperation({ summary: 'Create a new customer' })
   @ApiResponse({
     status: 201,
@@ -25,7 +26,7 @@ export class CustomersController {
   }
 
   @Get()
-  @RequirePermissions('CUSTOMER:VIEW')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_VIEW)
   @ApiOperation({ summary: 'Get all customers' })
   @ApiResponse({
     status: 200,
@@ -36,7 +37,7 @@ export class CustomersController {
   }
 
   @Get('deleted')
-  @RequirePermissions('CUSTOMER:VIEW_DELETED')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_VIEW_DELETED)
   @ApiOperation({ summary: 'Get all deleted customers' })
   @ApiResponse({
     status: 200,
@@ -47,7 +48,7 @@ export class CustomersController {
   }
   
   @Get('default')
-  @RequirePermissions('CUSTOMER:VIEW')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_VIEW)
   @ApiOperation({ summary: 'Get the default customer' })
   @ApiResponse({
     status: 200,
@@ -62,7 +63,7 @@ export class CustomersController {
   }
 
   @Get(':id')
-  @RequirePermissions('CUSTOMER:VIEW')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_VIEW)
   @ApiOperation({ summary: 'Get a customer by ID' })
   @ApiResponse({
     status: 200,
@@ -77,7 +78,7 @@ export class CustomersController {
   }
 
   @Patch(':id')
-  @RequirePermissions('CUSTOMER:UPDATE')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_UPDATE)
   @ApiOperation({ summary: 'Update a customer' })
   @ApiResponse({
     status: 200,
@@ -96,7 +97,7 @@ export class CustomersController {
   }
 
   @Patch(':id/restore')
-  @RequirePermissions('CUSTOMER:RESTORE')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_RESTORE)
   @ApiOperation({ summary: 'Restore a deleted customer' })
   @ApiResponse({
     status: 200,
@@ -115,7 +116,7 @@ export class CustomersController {
   }
 
   @Delete(':id')
-  @RequirePermissions('CUSTOMER:DELETE')
+  @RequirePermissions(PERMISSIONS.CUSTOMER_DELETE)
   @ApiOperation({ summary: 'Delete a customer' })
   @ApiResponse({
     status: 200,
