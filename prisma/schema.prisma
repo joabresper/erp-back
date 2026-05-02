@@ -115,6 +115,9 @@ model Sale {
   createdAt       DateTime @default(now())
   totalAmount     Decimal  @db.Decimal(10, 2)
   totalDiscountAmount  Decimal  @db.Decimal(10, 2)
+  amountPaid      Decimal  @db.Decimal(10, 2)
+  pickupDate      DateTime
+  contactName     String?  @db.VarChar(100)
   paymentStatus   PaymentStatus @default(PENDING)
   paymentMethod   PaymentMethod @default(CASH)
   invoiceNumber   String?
@@ -158,7 +161,7 @@ enum PaymentStatus {
   PENDING        // Pendiente de pago
   PARTIALLY_PAID // Pago parcial (señas)
   PAID           // Totalmente pagado
-  CANCELED      // Venta anulada (no se cobra)
+  CANCELLED      // Venta anulada (no se cobra)
   REFUNDED       // Devuelta (se cobró y se devolvió la plata)
 }
 

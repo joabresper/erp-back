@@ -41,6 +41,9 @@ describe('SalesService', () => {
     paymentStatus: PaymentStatus.PAID,
     invoiceType: InvoiceType.A,
     invoiceDate: new Date('2026-04-18T10:00:00.000Z'),
+    amountPaid: 235,
+    pickupDate: new Date('2026-04-19T10:00:00.000Z'),
+    contactName: 'John Doe',
     customerId: 'customer-99',
     saleItems: [
       {
@@ -61,6 +64,9 @@ describe('SalesService', () => {
     createdAt: new Date('2026-04-18T10:00:00.000Z'),
     totalAmount: 235,
     totalDiscountAmount: 15,
+    amountPaid: 235,
+    pickupDate: new Date('2026-04-19T10:00:00.000Z'),
+    contactName: 'John Doe',
     paymentStatus: PaymentStatus.PAID,
     paymentMethod: PaymentMethod.CASH,
     invoiceNumber: '00001-00000011',
@@ -158,6 +164,9 @@ describe('SalesService', () => {
           invoiceType: InvoiceType.A,
           invoiceNumber: '00001-00000011',
           invoiceDate: new Date('2026-04-18T10:00:00.000Z'),
+          pickupDate: new Date('2026-04-19T10:00:00.000Z'),
+          amountPaid: 235,
+          contactName: 'John Doe',
           totalAmount: 235,
           totalDiscountAmount: 15,
           items: {
@@ -196,6 +205,57 @@ describe('SalesService', () => {
       expect(result).toEqual(expect.any(Sale));
       expect(result.totalAmount).toBe(235);
       expect(result.totalDiscountAmount).toBe(15);
+      expect(result.amountPaid).toBe(235);
+      expect(result.pickupDate).toEqual(new Date('2026-04-19T10:00:00.000Z'));
+      expect(result.contactName).toBe('John Doe');
+    });
+
+    it('should persist a partial payment when amountPaid is lower than the total', async () => {
+      const dto = baseCreateSaleDto();
+      dto.paymentStatus = PaymentStatus.PARTIALLY_PAID;
+      dto.amountPaid = 100;
+      dto.contactName = 'Client partial';
+
+      mockUsersService.findById.mockResolvedValue({ id: 'user-1' });
+      mockPrismaService.invoiceSequence.findFirstOrThrow.mockResolvedValue({
+        id: 'sequence-1',
+        lastNumber: 10,
+      });
+      mockPrismaService.invoiceSequence.update.mockResolvedValue({});
+      mockProductsService.findOne
+        .mockResolvedValueOnce({
+          id: 'product-1',
+          name: 'Product 1',
+          sku: 'SKU-1',
+          price: 100,
+        })
+        .mockResolvedValueOnce({
+          id: 'product-2',
+          name: 'Product 2',
+          sku: 'SKU-2',
+          price: 50,
+        });
+      mockPrismaService.customer.findFirst.mockResolvedValue({ id: 'customer-default' });
+      mockPrismaService.sale.create.mockResolvedValue({
+        ...mockRawSale,
+        paymentStatus: PaymentStatus.PARTIALLY_PAID,
+        amountPaid: 100,
+        contactName: 'Client partial',
+      });
+
+      const result = await service.create('user-1', dto);
+
+      expect(mockPrismaService.sale.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            paymentStatus: PaymentStatus.PARTIALLY_PAID,
+            amountPaid: 100,
+            contactName: 'Client partial',
+          }),
+        }),
+      );
+      expect(result.paymentStatus).toBe(PaymentStatus.PARTIALLY_PAID);
+      expect(result.amountPaid).toBe(100);
     });
 
     it('should use default customer when customerId is not provided', async () => {
@@ -243,6 +303,7 @@ describe('SalesService', () => {
     it('should use current date when invoiceDate is not provided', async () => {
       const dto = baseCreateSaleDto();
       dto.invoiceDate = undefined;
+      dto.amountPaid = undefined;
 
       mockUsersService.findById.mockResolvedValue({ id: 'user-1' });
       mockPrismaService.invoiceSequence.findFirstOrThrow.mockResolvedValue({
@@ -272,6 +333,7 @@ describe('SalesService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             invoiceDate: expect.any(Date),
+            amountPaid: 235,
           }),
         }),
       );
@@ -312,6 +374,7 @@ describe('SalesService', () => {
           data: expect.objectContaining({
             totalAmount: 200,
             totalDiscountAmount: 0,
+            amountPaid: 235,
             items: {
               create: [
                 expect.objectContaining({
@@ -621,11 +684,17 @@ describe('SalesService', () => {
     it('should update a sale and return entity', async () => {
       const updateSaleDto: UpdateSaleDto = {
         paymentStatus: PaymentStatus.PENDING,
+        amountPaid: 150,
+        pickupDate: new Date('2026-04-20T10:00:00.000Z'),
+        contactName: 'Updated contact',
       };
 
       mockPrismaService.sale.update.mockResolvedValue({
         ...mockRawSale,
         paymentStatus: PaymentStatus.PENDING,
+        amountPaid: 150,
+        pickupDate: new Date('2026-04-20T10:00:00.000Z'),
+        contactName: 'Updated contact',
       });
 
       const result = await service.update('sale-1', updateSaleDto);

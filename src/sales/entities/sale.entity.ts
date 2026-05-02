@@ -5,9 +5,12 @@ export class Sale {
 	id!: string;
 	createdAt!: Date;
 	totalAmount!: number;
-	totalDiscountAmount!: number
+	totalDiscountAmount!: number;
 	paymentStatus!: PaymentStatus;
-	paymentMethod!: PaymentMethod
+	paymentMethod!: PaymentMethod;
+	amountPaid!: number;
+	pickupDate!: Date;
+	contactName!: string | null;
 	invoiceNumber!: string;
 	invoiceDate!: Date;
 	invoiceType!: InvoiceType;
@@ -21,6 +24,7 @@ export class Sale {
 			...partial,
 			totalAmount: partial.totalAmount ? Number(partial.totalAmount) : 0,
 			totalDiscountAmount: partial.totalDiscountAmount ? Number(partial.totalDiscountAmount) : 0,
+			amountPaid: partial.amountPaid ? Number(partial.amountPaid) : 0,
 		});
 	}
 }

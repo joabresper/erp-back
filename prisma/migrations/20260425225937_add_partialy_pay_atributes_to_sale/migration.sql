@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Sale" ALTER COLUMN "pickupDate" SET DATA TYPE TIMESTAMP(3);

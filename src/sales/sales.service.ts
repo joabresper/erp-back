@@ -33,8 +33,8 @@ export class SalesService {
       data: { lastNumber: nextNumber },
     });
 
-    const { saleItems, customerId, ...restOfDto } = createSaleDto;
-
+    const { saleItems, customerId, amountPaid, pickupDate, ...restOfDto } = createSaleDto;
+    
     const itemsWithData = await Promise.all(
       saleItems.map(async (item) => {
         const product = await this.productsService.findOne(item.productId);
@@ -53,6 +53,9 @@ export class SalesService {
 
     const totalAmount = itemsWithData.reduce((sum, item) => sum + item.subtotalAmount - item.discountAmount, 0);
     const totalDiscountAmount = itemsWithData.reduce((sum, item) => sum + item.discountAmount, 0);
+    
+    const finalPickupDate = pickupDate || invoiceDate;
+    const finalAmountPaid = amountPaid ?? totalAmount;
 
     const defaultCustomer = await this.prismaService.customer.findFirst({
       where: { taxId: '00000000000' },
@@ -67,6 +70,8 @@ export class SalesService {
         ...restOfDto,
         invoiceNumber,
         invoiceDate,
+        pickupDate: finalPickupDate,
+        amountPaid: finalAmountPaid,
         totalAmount,
         totalDiscountAmount,
         items: {
